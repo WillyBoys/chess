@@ -1,2 +1,4 @@
-# chess
-CS240 BYU
+# 240 chess
+
+This is the repository for BYU CS240
+
