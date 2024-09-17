@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -10,8 +11,11 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessPiece {
-
+    PieceType type;
+    ChessGame.TeamColor teamColor;
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        this.type = type;
+        this.teamColor = pieceColor;
     }
 
     /**
@@ -25,14 +29,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return teamColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
     }
 
     /**
@@ -53,55 +57,128 @@ public class ChessPiece {
         switch (piece.getPieceType()) {
             case PAWN:
                 // Implement pawn move logic
-                addPawnMoves(board, myPosition, moves);
+                addPawnMoves(board, myPosition);
                 break;
             case ROOK:
                 // Implement rook move logic
-                addRookMoves(board, myPosition, moves);
+                addRookMoves(board, myPosition);
                 break;
             case BISHOP:
                 // Implement bishop move logic
-                addBishopMoves(board, myPosition, moves);
+                moves = addBishopMoves(board, myPosition);
                 break;
             case KNIGHT:
                 // Implement knight move logic
-                addKnightMoves(board, myPosition, moves);
+                addKnightMoves(board, myPosition);
                 break;
             case QUEEN:
                 // Implement queen move logic
-                addQueenMoves(board, myPosition, moves);
+                addQueenMoves(board, myPosition);
                 break;
             case KING:
                 // Implement king move logic
-                addKingMoves(board, myPosition, moves);
+                addKingMoves(board, myPosition);
                 break;
             default:
-                throw new IllegalStateException("Unexpected piece type: " + piece.getType());
+                throw new IllegalStateException("Unexpected piece type: " + piece);
         }
+        return moves;
+    }
         // Example methods for adding specific piece moves
 
-        private void addPawnMoves (ChessBoard board, ChessPosition position, List < ChessMove > moves){
+        private void addPawnMoves(ChessBoard board, ChessPosition position){
             // Implement pawn movement logic here
         }
 
-        private void addRookMoves (ChessBoard board, ChessPosition position, List < ChessMove > moves){
+        private void addRookMoves (ChessBoard board, ChessPosition position){
             // Implement rook movement logic here
         }
 
-        private void addBishopMoves (ChessBoard board, ChessPosition position, List < ChessMove > moves){
-            // Implement bishop movement logic here
+        private Collection<ChessMove> addBishopMoves (ChessBoard board, ChessPosition position){
+            ArrayList < ChessMove > moves = new ArrayList<>();
+            //Moving Up and Right
+            int moveMax = 8 - Math.max(position.getRow(), position.getColumn());
+            for (int i = 1; i <= moveMax; i++) {
+                ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() + i);
+                ChessPiece piece = board.getPiece(endPosition);
+                if (piece == null || piece.getTeamColor() != getTeamColor()) {
+                    moves.add(new ChessMove(position, endPosition, null));
+                }
+                if (piece != null) {
+                    break;
+                }
+            }
+            // Moving Down and Right
+            moveMax = 8 - Math.max(9 - position.getRow(), position.getColumn());
+            for (int i = 1; i <= moveMax; i++) {
+                ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() + i);
+                ChessPiece piece = board.getPiece(endPosition);
+                if (piece == null || piece.getTeamColor() != getTeamColor()) {
+                    moves.add(new ChessMove(position, endPosition, null));
+                }
+                if (piece != null) {
+                    break;
+                }
+            }
+            // Moving Left and Up
+            moveMax = 8 - Math.max(position.getRow(),9 - position.getColumn());
+            for (int i = 1; i <= moveMax; i++) {
+                ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() - i);
+                ChessPiece piece = board.getPiece(endPosition);
+                if (piece == null || piece.getTeamColor() != getTeamColor()) {
+                    moves.add(new ChessMove(position, endPosition, null));
+                }
+                if (piece != null) {
+                    break;
+                }
+            }
+            // Moving Left and Down
+            moveMax = 8 - Math.max(9 - position.getRow(),9 - position.getColumn());
+            for (int i = 1; i <= moveMax; i++) {
+                ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() - i);
+                ChessPiece piece = board.getPiece(endPosition);
+                if (piece == null || piece.getTeamColor() != getTeamColor()) {
+                    moves.add(new ChessMove(position, endPosition, null));
+                }
+                if (piece != null) {
+                    break;
+                }
+            }
+            return moves;
         }
 
-        private void addKnightMoves (ChessBoard board, ChessPosition position, List < ChessMove > moves){
+        private void addKnightMoves (ChessBoard board, ChessPosition position){
             // Implement knight movement logic here
         }
 
-        private void addQueenMoves (ChessBoard board, ChessPosition position, List < ChessMove > moves){
+        private void addQueenMoves (ChessBoard board, ChessPosition position){
             // Implement queen movement logic here
         }
 
-        private void addKingMoves (ChessBoard board, ChessPosition position, List < ChessMove > moves){
+        private void addKingMoves (ChessBoard board, ChessPosition position){
             // Implement king movement logic here
         }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return type == that.type && teamColor == that.teamColor;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, teamColor);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "type=" + type +
+                ", teamColor=" + teamColor +
+                '}';
     }
 }
+
+
