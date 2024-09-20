@@ -14,7 +14,7 @@ public class ChessPosition {
     private final int col;
 
     public ChessPosition(int row, int col) {
-        if (row < 1 || row > 8 || col < 1 || col > 8) { throw new IllegalArgumentException("This piece isn't on the board!"); }
+        //if (row < 1 || row > 8 || col < 1 || col > 8) { throw new IllegalArgumentException("This piece isn't on the board!"); }
 
         this.row = row;
         this.col = col;
