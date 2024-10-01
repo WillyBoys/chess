@@ -58,27 +58,21 @@ public class ChessPiece {
 
         switch (piece.getPieceType()) {
             case PAWN:
-                // Implement pawn move logic
                 moves = addPawnMoves(board, myPosition);
                 break;
             case ROOK:
-                // Implement rook move logic
                 moves = addRookMoves(board, myPosition);
                 break;
             case BISHOP:
-                // Implement bishop move logic
                 moves = addBishopMoves(board, myPosition);
                 break;
             case KNIGHT:
-                // Implement knight move logic
                 moves = addKnightMoves(board, myPosition);
                 break;
             case QUEEN:
-                // Implement queen move logic
                 moves = addQueenMoves(board, myPosition);
                 break;
             case KING:
-                // Implement king move logic
                 moves = addKingMoves(board, myPosition);
                 break;
             default:
