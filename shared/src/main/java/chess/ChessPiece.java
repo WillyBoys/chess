@@ -115,10 +115,10 @@ public class ChessPiece {
             if (attackPosition.checkBounds()) {
                 piece = board.getPiece(attackPosition);
                 if (piece != null && getTeamColor() != piece.getTeamColor() && attackPosition.getRow() == 8) {
-                    moves.add(new ChessMove(position, endPosition, PieceType.KNIGHT));
-                    moves.add(new ChessMove(position, endPosition, PieceType.ROOK));
-                    moves.add(new ChessMove(position, endPosition, PieceType.QUEEN));
-                    moves.add(new ChessMove(position, endPosition, PieceType.BISHOP));
+                    moves.add(new ChessMove(position, attackPosition, PieceType.KNIGHT));
+                    moves.add(new ChessMove(position, attackPosition, PieceType.ROOK));
+                    moves.add(new ChessMove(position, attackPosition, PieceType.QUEEN));
+                    moves.add(new ChessMove(position, attackPosition, PieceType.BISHOP));
                 } else if (piece != null && getTeamColor() != piece.getTeamColor()) {
                     moves.add(new ChessMove(position, attackPosition, null));
                 }

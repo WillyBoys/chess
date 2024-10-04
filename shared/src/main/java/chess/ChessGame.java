@@ -172,6 +172,9 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         //Run through all the same team pieces, run all moves, and see if any move leaves the king out of check
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
         Collection<ChessMove> moves;
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
@@ -206,6 +209,9 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        if (isInCheck(teamColor)) {
+            return false;
+        }
         Collection<ChessMove> moves;
         Collection<ChessMove> validMoves = new ArrayList<>();
         for (int i = 1; i < 9; i++) {
@@ -230,7 +236,7 @@ public class ChessGame {
                 }
             }
         }
-        if (validMoves == null) {
+        if (validMoves.isEmpty()) {
             return true;
         }
         return false;
