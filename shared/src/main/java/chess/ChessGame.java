@@ -54,10 +54,24 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         // Make a copy of the board, make the move, use isInCheck to see if valid there.
-        ChessBoard copyBoard = board;
-        ChessPiece piece = copyBoard.getPiece(startPosition);
-        Collection<ChessMove> moves = piece.pieceMoves(copyBoard, startPosition);
-        //when calling makeMove, store the startPosition in a temp variable so that you can make the move back again
+        ChessPiece piece = board.getPiece(startPosition);
+        Collection<ChessMove> moves = piece.pieceMoves(board, startPosition);
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        for (ChessMove move : moves) {
+            ChessPiece tempPiece = board.getPiece(move.getStartPosition());
+            ChessPosition tempStart = move.getStartPosition();
+            ChessPosition tempFinal = move.getEndPosition();
+            ChessPiece tempDead = board.getPiece(tempFinal);
+            board.addPiece(tempFinal, tempPiece);
+            board.addPiece(tempStart, null);
+            boolean check = isInCheck(tempPiece.teamColor);
+            if (!check) {
+                validMoves.add(move);
+            }
+            board.addPiece(tempStart, tempPiece);
+            board.addPiece(tempFinal, tempDead);
+        }
+        return validMoves;
     }
 
     /**
@@ -70,12 +84,12 @@ public class ChessGame {
         // Makes the move on the board
         // Do this after determining whether the King is in check and checking for valid moves
         ChessPiece piece = board.getPiece(move.getStartPosition());
-        ChessPiece promotion = board.getPiece(move.getPromotionPiece());
-        ChessPosition finalPosition = move.getEndPosition();
+        //ChessPiece promotion = board.getPiece(move.getPromotionPiece());
+        //ChessPosition finalPosition = move.getEndPosition();
         //assign the finalPosition to the piece's starting position
-        if (promotion != null) {
-            piece.PieceType = promotion;
-        }
+        //if (promotion != null) {
+        //    piece.PieceType = promotion;
+        //}
     }
 
     /**
@@ -110,6 +124,12 @@ public class ChessGame {
         return false;
     }
 
+    /**
+     * Loops through the board and finds the King of any given Team Color
+     *
+     * @param teamColor which is the team color you are trying to find
+     * @return the position of the King
+     */
     private ChessPosition findKing(TeamColor teamColor) {
         ChessPosition current;
         ChessPiece piece;
