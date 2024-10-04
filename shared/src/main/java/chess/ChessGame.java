@@ -84,12 +84,29 @@ public class ChessGame {
         // Makes the move on the board
         // Do this after determining whether the King is in check and checking for valid moves
         ChessPiece piece = board.getPiece(move.getStartPosition());
-        //ChessPiece promotion = board.getPiece(move.getPromotionPiece());
-        //ChessPosition finalPosition = move.getEndPosition();
-        //assign the finalPosition to the piece's starting position
-        //if (promotion != null) {
-        //    piece.PieceType = promotion;
-        //}
+        if (piece == null) {
+            throw new InvalidMoveException();
+        }
+        Collection<ChessMove> valid = validMoves(move.getStartPosition());
+        if (valid.contains(move) && piece.getTeamColor() == currentTurn) {
+            ChessPosition tempStart = move.getStartPosition();
+            ChessPosition tempFinal = move.getEndPosition();
+            if (move.getPromotionPiece() != null) {
+                ChessPiece promoPiece = new ChessPiece(piece.teamColor, move.getPromotionPiece());
+                board.addPiece(tempFinal, promoPiece);
+            } else {
+                board.addPiece(tempFinal, piece);
+            }
+            board.addPiece(tempStart, null);
+            if (piece.getTeamColor() == TeamColor.WHITE) {
+                currentTurn = TeamColor.BLACK;
+            } else {
+                currentTurn = TeamColor.WHITE;
+            }
+        } else {
+            throw new InvalidMoveException();
+        }
+
     }
 
     /**
