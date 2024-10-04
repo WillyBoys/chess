@@ -393,102 +393,11 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> addQueenMoves(ChessBoard board, ChessPosition position) {
-        // Bishop Logic
-        ArrayList<ChessMove> moves = new ArrayList<>();
-        //Moving Up and Right
-        int moveMax = 8 - Math.max(position.getRow(), position.getColumn());
-        for (int i = 1; i <= moveMax; i++) {
-            ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() + i);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-            if (piece != null) {
-                break;
-            }
-        }
-        // Moving Down and Right
-        moveMax = 8 - Math.max(9 - position.getRow(), position.getColumn());
-        for (int i = 1; i <= moveMax; i++) {
-            ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() + i);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-            if (piece != null) {
-                break;
-            }
-        }
-        // Moving Left and Up
-        moveMax = 8 - Math.max(position.getRow(), 9 - position.getColumn());
-        for (int i = 1; i <= moveMax; i++) {
-            ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() - i);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-            if (piece != null) {
-                break;
-            }
-        }
-        // Moving Left and Down
-        moveMax = 8 - Math.max(9 - position.getRow(), 9 - position.getColumn());
-        for (int i = 1; i <= moveMax; i++) {
-            ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() - i);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-            if (piece != null) {
-                break;
-            }
-        }
-
-        // Rook Logic
-        // Right
-        for (int i = 1; i < 9 - position.getColumn(); i++) {
-            ChessPosition endPosition = new ChessPosition(position.getRow(), position.getColumn() + i);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-            if (piece != null) {
-                break;
-            }
-        }
-        // Left
-        for (int i = 1; i < position.getColumn(); i++) {
-            ChessPosition endPosition = new ChessPosition(position.getRow(), position.getColumn() - i);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-            if (piece != null) {
-                break;
-            }
-        }
-        // Down
-        for (int i = 1; i < position.getRow(); i++) {
-            ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn());
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-            if (piece != null) {
-                break;
-            }
-        }
-        // Up
-        for (int i = 1; i < 9 - position.getRow(); i++) {
-            ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn());
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-            if (piece != null) {
-                break;
-            }
-        }
+        Collection<ChessMove> moves;
+        Collection<ChessMove> rookMoves;
+        moves = addBishopMoves(board, position);
+        rookMoves = addRookMoves(board, position);
+        moves.addAll(rookMoves);
         return moves;
     }
 
