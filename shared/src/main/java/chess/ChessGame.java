@@ -173,7 +173,6 @@ public class ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         //Run through all the same team pieces, run all moves, and see if any move leaves the king out of check
         Collection<ChessMove> moves;
-        Collection<ChessMove> validMoves = new ArrayList<ChessMove>();
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
                 ChessPosition tempPos = new ChessPosition(i, j);
@@ -207,7 +206,34 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> moves;
+        Collection<ChessMove> validMoves = new ArrayList<>();
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                ChessPosition tempPos = new ChessPosition(i, j);
+                ChessPiece tempPiece = board.getPiece(tempPos);
+                if (tempPiece != null && tempPiece.getTeamColor() == teamColor) {
+                    moves = validMoves(tempPos);
+                    for (ChessMove move : moves) {
+                        ChessPosition tempStart = move.getStartPosition();
+                        ChessPosition tempFinal = move.getEndPosition();
+                        ChessPiece tempDead = board.getPiece(tempFinal);
+                        board.addPiece(tempFinal, tempPiece);
+                        board.addPiece(tempStart, null);
+                        boolean check = isInCheck(tempPiece.teamColor);
+                        if (!check) {
+                            validMoves.add(move);
+                        }
+                        board.addPiece(tempStart, tempPiece);
+                        board.addPiece(tempFinal, tempDead);
+                    }
+                }
+            }
+        }
+        if (validMoves == null) {
+            return true;
+        }
+        return false;
     }
 
     /**
