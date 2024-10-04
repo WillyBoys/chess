@@ -56,8 +56,8 @@ public class ChessGame {
         // Make a copy of the board, make the move, use isInCheck to see if valid there.
         ChessBoard copyBoard = board;
         ChessPiece piece = copyBoard.getPiece(startPosition);
-        piece.pieceMoves(copyBoard, startPosition);
-        
+        Collection<ChessMove> moves = piece.pieceMoves(copyBoard, startPosition);
+        //when calling makeMove, store the startPosition in a temp variable so that you can make the move back again
     }
 
     /**
@@ -69,7 +69,13 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         // Makes the move on the board
         // Do this after determining whether the King is in check and checking for valid moves
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        ChessPiece promotion = board.getPiece(move.getPromotionPiece());
+        ChessPosition finalPosition = move.getEndPosition();
+        //assign the finalPosition to the piece's starting position
+        if (promotion != null) {
+            piece.PieceType = promotion;
+        }
     }
 
     /**
