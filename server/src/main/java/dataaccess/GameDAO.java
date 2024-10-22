@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public interface GameDAO {
     void clear();
 
-    void createGame();
+    int createGame(GameData game);
 
     GameData getGame();
 

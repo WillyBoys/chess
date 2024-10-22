@@ -3,7 +3,11 @@ package service;
 import dataaccess.AuthDAO;
 
 public class AuthService {
-    public AuthService(AuthDAO authDAO) {
+    AuthDAO authDAO;
 
+    public AuthService(AuthDAO authDAO) {
+        this.authDAO = authDAO;
     }
+
+
 }
