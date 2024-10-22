@@ -7,20 +7,28 @@ import model.AuthData;
 import model.UserData;
 
 public class UserService {
+    UserDAO userDAO;
+    AuthDAO authDAO;
+
+    public UserService(UserDAO userDAO, AuthDAO authDAO) {
+        this.userDAO = userDAO;
+        this.authDAO = authDAO;
+    }
+
     public AuthData register(UserData user) {
-        MemoryUserDAO.createUser(user);
-        AuthDAO.createAuth();
-        AuthDAO.getAuth();
+        userDAO.createUser(user);
+        authDAO.createAuth();
+        return authDAO.getAuth();
     }
 
     public AuthData login(UserData user) {
-        UserDAO.getUser(user);
-        AuthDAO.createAuth();
-        AuthDAO.getAuth();
+        userDAO.getUser(user.username());
+        authDAO.createAuth();
+        return authDAO.getAuth();
     }
 
     public void logout(AuthData auth) {
-        AuthDAO.getAuth();
-        AuthDAO.deleteAuth();
+        authDAO.getAuth();
+        authDAO.deleteAuth();
     }
 }

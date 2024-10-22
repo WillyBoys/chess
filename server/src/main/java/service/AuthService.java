@@ -1,5 +1,9 @@
 package service;
 
-public class AuthService {
+import dataaccess.AuthDAO;
 
+public class AuthService {
+    public AuthService(AuthDAO authDAO) {
+
+    }
 }

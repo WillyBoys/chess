@@ -1,9 +1,11 @@
 package dataaccess;
 
+import model.UserData;
+
 public interface UserDAO {
     void clear();
 
-    void createUser();
+    void createUser(UserData data);
 
     model.UserData getUser(String username);
 }

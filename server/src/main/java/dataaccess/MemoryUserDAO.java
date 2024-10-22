@@ -6,7 +6,6 @@ import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO {
     HashMap<String, UserData> UserDB = new HashMap<>();
-    model.UserData data;
 
     @Override
     public void clear() {
@@ -14,8 +13,8 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public void createUser() {
-        UserDB.put(data.username(), data);
+    public void createUser(UserData user) {
+        UserDB.put(user.username(), user);
     }
 
     @Override
