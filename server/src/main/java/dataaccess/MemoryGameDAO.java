@@ -1,14 +1,12 @@
 package dataaccess;
 
-import model.AuthData;
 import model.GameData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MemoryGameDAO implements GameDAO {
-    model.GameData data;
-    HashMap<Integer, GameData> GameDB = new HashMap<>();
+    HashMap<Object, GameData> GameDB = new HashMap<>();
 
     @Override
     public void clear() {
@@ -22,21 +20,21 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGame() {
-        return GameDB.get(data.gameID());
+    public GameData getGame(String gameID) {
+        return GameDB.get(gameID);
     }
 
     @Override
     public ArrayList<GameData> listGame() {
         ArrayList<GameData> listGames = new ArrayList<>();
         for (int i = 0; i < GameDB.size(); i++) {
-            listGames.add(GameDB.get(data.gameID()));
+            listGames.add(GameDB.get(i));
         }
         return listGames;
     }
 
     @Override
-    public void updateGame() {
+    public void updateGame(GameData data) {
         GameDB.put(data.gameID(), data);
     }
 }

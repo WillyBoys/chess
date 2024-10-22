@@ -44,4 +44,8 @@ public class UserService {
         }
         authDAO.deleteAuth(auth);
     }
+
+    public void clear() {
+        userDAO.clear();
+    }
 }

@@ -60,6 +60,7 @@ public class Server {
                 return new Gson().toJson(error);
             }
         }
+        return "404";
     }
 
     private Object loginUser(Request req, Response res) throws DataAccessException {
@@ -96,15 +97,31 @@ public class Server {
 
     private Object joinGame(Request req, Response res) {
         res.type("application/json");
-        GameData info = new Gson().fromJson(req.body(), GameData.class);
-        String gameName = info.gameName();
-        if (info.blackUsername() != null) {
-            gameServ.joinGame
+        try {
+            GameData info = new Gson().fromJson(req.body(), GameData.class);
+            String gameName = info.gameName();
+            AuthData auth = new Gson().fromJson(req.body(), AuthData.class);
+            if (info.blackUsername() != null) {
+                String user = info.blackUsername();
+                String color = "black";
+                gameServ.joinGame(gameName, user, color, auth);
+            } else {
+                String user = info.whiteUsername();
+                String color = "white";
+                gameServ.joinGame(gameName, user, color, auth);
+            }
+        } catch (DataAccessException error) {
+            if (error.equals("PUT MESSAGE HERE")) {
+                //DO STUFF
+            }
         }
+        return "";
     }
+
 
     private Object clear(Request req, Response res) {
         res.type("application/json");
+
         return "";
     }
 

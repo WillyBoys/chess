@@ -35,7 +35,25 @@ public class GameService {
         return id;
     }
 
-    public void joinGame(String name, String playerColor, AuthData auth) {
-        
+    public void joinGame(String name, String playerName, String color, AuthData auth) throws DataAccessException {
+        authDAO.getAuth(auth);
+        if (auth == null) {
+            throw new DataAccessException("Not logged in");
+        }
+        GameData data = gameDAO.getGame(name);
+        if (data == null) {
+            throw new DataAccessException("Game doesn't exist");
+        }
+        if (color.equals("black")) {
+            GameData game = new GameData(data.gameID(), data.whiteUsername(), playerName, data.gameName(), data.game());
+            gameDAO.updateGame(game);
+        } else {
+            GameData game = new GameData(data.gameID(), playerName, data.blackUsername(), data.gameName(), data.game());
+            gameDAO.updateGame(game);
+        }
+    }
+
+    public void clear() {
+        gameDAO.clear();
     }
 }
