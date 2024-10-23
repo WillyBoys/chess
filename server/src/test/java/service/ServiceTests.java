@@ -11,6 +11,7 @@ import passoff.model.TestCreateRequest;
 import service.*;
 import dataaccess.*;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,5 +64,43 @@ public class ServiceTests {
         AuthData authData = userService.register(user);
         assertNotNull(authData);
         assertEquals("testUser", authData.username());
+    }
+
+    @Test
+    public void registerUserFail() throws DataAccessException {
+        UserData user = new UserData("testUser", null, "email@test.com");
+        assertThrows(DataAccessException.class, () -> userService.register(user));
+    }
+
+    @Test
+    public void loginSuccess() throws DataAccessException {
+        UserData user = new UserData("existingUser", "password", "email@test.com");
+        userDAO.createUser(user);
+        AuthData authData = userService.login(user);
+        assertNotNull(authData);
+    }
+
+    @Test
+    public void loginFail() throws DataAccessException {
+        UserData user = new UserData("existingUser", "wrongPassword", "email@test.com");
+        userDAO.createUser(new UserData("existingUser", "password", "email@test.com"));
+        assertThrows(DataAccessException.class, () -> userService.login(user));
+    }
+
+    //NEEDS MORE WORK
+    @Test
+    public void logoutSuccess() throws DataAccessException {
+        UserData user = new UserData("existingUser", "password", "email@test.com");
+        AuthData auth = userService.register(user);
+        userService.logout(auth);
+        assertNotNull(authDAO.getAuth(auth));
+    }
+
+    @Test
+    public void logoutFail() throws DataAccessException {
+        UserData user = new UserData("existingUser", "password", "email@test.com");
+        AuthData auth = userService.register(user);
+        AuthData auths = new AuthData("2134", "testStuff");
+        assertThrows(DataAccessException.class, () -> userService.logout(auths));
     }
 }
