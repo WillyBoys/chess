@@ -12,4 +12,6 @@ public interface AuthDAO {
     String getUsername(AuthData auth);
 
     void deleteAuth(AuthData auth);
+
+    int getDBSize();
 }

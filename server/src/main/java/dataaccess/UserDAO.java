@@ -8,4 +8,6 @@ public interface UserDAO {
     void createUser(UserData data);
 
     model.UserData getUser(String username);
+
+    int getDBSize();
 }

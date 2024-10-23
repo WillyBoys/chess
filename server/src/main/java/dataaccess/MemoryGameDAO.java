@@ -20,7 +20,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGame(String gameID) {
+    public GameData getGame(int gameID) {
         return GameDB.get(gameID);
     }
 

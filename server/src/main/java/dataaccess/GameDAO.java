@@ -11,7 +11,7 @@ public interface GameDAO {
 
     int createGame(GameData game);
 
-    GameData getGame(String gameID);
+    GameData getGame(int gameID);
 
     ArrayList<GameData> listGame();
 

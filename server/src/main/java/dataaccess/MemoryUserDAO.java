@@ -21,4 +21,8 @@ public class MemoryUserDAO implements UserDAO {
     public model.UserData getUser(String username) {
         return UserDB.get(username);
     }
+
+    public int getDBSize() {
+        return UserDB.size();
+    }
 }

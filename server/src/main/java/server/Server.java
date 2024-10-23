@@ -150,7 +150,7 @@ public class Server {
 
         if (auths == null || auths.isEmpty()) {
             res.status(401);
-            return new Gson().toJson(Map.of("message", "Authorization header is missing"));
+            return new Gson().toJson(Map.of("message", "Error: unauthorized"));
         }
 
         AuthData auth = new AuthData(auths, null);
@@ -158,7 +158,7 @@ public class Server {
         // Validate the token
         if (authDAO.getAuth(auth) == null) {
             res.status(401);
-            return new Gson().toJson(Map.of("message", "Invalid or expired Authorization token"));
+            return new Gson().toJson(Map.of("message", "Error: unauthorized"));
         }
 
         GameData info = new Gson().fromJson(req.body(), GameData.class);
@@ -175,20 +175,16 @@ public class Server {
     private Object joinGame(Request req, Response res) {
         res.type("application/json");
         try {
-            GameData info = new Gson().fromJson(req.body(), GameData.class);
-            String gameName = info.gameName();
-            AuthData auth = new Gson().fromJson(req.body(), AuthData.class);
-            if (info.blackUsername() != null) {
-                String user = info.blackUsername();
-                String color = "black";
-                gameServ.joinGame(gameName, user, color, auth);
-            } else {
-                String user = info.whiteUsername();
-                String color = "white";
-                gameServ.joinGame(gameName, user, color, auth);
-            }
+            JoinGameRequest info = new Gson().fromJson(req.body(), JoinGameRequest.class);
+            String auths = req.headers("Authorization");
+            AuthData auther = new AuthData(auths, null);
+            String username = authServ.getUsername(auther);
+            AuthData auth = new AuthData(auths, username);
+
+            gameServ.joinGame(info, auth);
+
             res.status(200);
-            return "";
+            return new Gson().toJson(Map.of());
         } catch (DataAccessException error) {
             return handleError(res, error);
         }

@@ -7,6 +7,7 @@ import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
 import com.google.gson.Gson;
+import model.JoinGameRequest;
 
 import java.util.Map;
 import java.util.Collection;
@@ -40,27 +41,31 @@ public class GameService {
         return id;
     }
 
-    public void joinGame(String name, String playerName, String color, AuthData auth) throws DataAccessException {
+    public void joinGame(JoinGameRequest info, AuthData auth) throws DataAccessException {
         var authenticatedUser = authDAO.getAuth(auth);
         if (authenticatedUser == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        GameData data = gameDAO.getGame(name);
+        GameData data = gameDAO.getGame(info.gameID());
         if (data == null) {
             throw new DataAccessException("Error: bad request");
         }
 
-        if (color.equals("black")) {
+        if (info.playerColor() == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+
+        if (info.playerColor().equals("BLACK")) {
             if (data.blackUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            GameData game = new GameData(data.gameID(), data.whiteUsername(), playerName, data.gameName(), data.game());
+            GameData game = new GameData(data.gameID(), data.whiteUsername(), auth.username(), data.gameName(), data.game());
             gameDAO.updateGame(game);
         } else {
             if (data.whiteUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            GameData game = new GameData(data.gameID(), playerName, data.blackUsername(), data.gameName(), data.game());
+            GameData game = new GameData(data.gameID(), auth.username(), data.blackUsername(), data.gameName(), data.game());
             gameDAO.updateGame(game);
         }
     }
