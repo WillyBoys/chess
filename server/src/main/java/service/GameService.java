@@ -33,6 +33,10 @@ public class GameService {
     public int createGame(String gameName, AuthData auth) throws DataAccessException {
         id++;
 
+        if (gameName == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+
         ChessGame board = new ChessGame();
         GameData gameData = new GameData(id, null, null, gameName, board);
 
