@@ -6,7 +6,9 @@ import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
+import com.google.gson.Gson;
 
+import java.util.Map;
 import java.util.Collection;
 
 public class GameService {
@@ -27,27 +29,27 @@ public class GameService {
         return gameDAO.listGame();
     }
 
-    public int createGame(String game, AuthData auth) throws DataAccessException {
+    public int createGame(String gameName, AuthData auth) throws DataAccessException {
         id++;
+
         ChessGame board = new ChessGame();
-        GameData data = new GameData(id, null, null, game, board);
-        var info = authDAO.getAuth(auth);
-        if (info == null) {
-            throw new DataAccessException("Error: unauthorized");
-        }
-        gameDAO.createGame(data);
+        GameData gameData = new GameData(id, null, null, gameName, board);
+
+        gameDAO.createGame(gameData);
+
         return id;
     }
 
     public void joinGame(String name, String playerName, String color, AuthData auth) throws DataAccessException {
-        authDAO.getAuth(auth);
-        if (auth == null) {
+        var authenticatedUser = authDAO.getAuth(auth);
+        if (authenticatedUser == null) {
             throw new DataAccessException("Error: unauthorized");
         }
         GameData data = gameDAO.getGame(name);
         if (data == null) {
             throw new DataAccessException("Error: bad request");
         }
+
         if (color.equals("black")) {
             if (data.blackUsername() != null) {
                 throw new DataAccessException("Error: already taken");

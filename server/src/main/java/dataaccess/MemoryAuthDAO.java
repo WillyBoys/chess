@@ -14,10 +14,6 @@ public class MemoryAuthDAO implements AuthDAO {
 
     HashMap<String, AuthData> AuthDB = new HashMap<>();
 
-    @Override
-    public void clear() {
-        AuthDB.clear();
-    }
 
     @Override
     public AuthData createAuth(String username) {
@@ -29,12 +25,30 @@ public class MemoryAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getAuth(AuthData auth) {
+        if (auth == null || auth.authToken() == null) {
+            return null;
+        }
         return AuthDB.get(auth.authToken());
     }
 
     @Override
+    public String getUsername(AuthData auth) {
+        AuthData retrievedAuth = AuthDB.get(auth.authToken());
+        return retrievedAuth != null ? retrievedAuth.username() : null;
+
+
+    }
+
+    @Override
     public void deleteAuth(AuthData auth) {
-        AuthDB.remove(auth.authToken());
+        if (AuthDB.containsKey(auth.authToken())) {
+            AuthDB.remove(auth.authToken());
+        }
+    }
+
+    @Override
+    public void clear() {
+        AuthDB.clear();
     }
 }
 

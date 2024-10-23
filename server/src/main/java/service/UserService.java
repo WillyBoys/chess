@@ -1,9 +1,6 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryUserDAO;
-import dataaccess.UserDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 
@@ -49,6 +46,9 @@ public class UserService {
     }
 
     public void logout(AuthData auth) throws DataAccessException {
+        if (auth == null) {
+            throw new DataAccessException(("Error: unauthorized"));
+        }
         var info = authDAO.getAuth(auth);
         if (info == null) {
             throw new DataAccessException("Error: unauthorized");

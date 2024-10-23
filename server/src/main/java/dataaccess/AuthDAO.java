@@ -9,5 +9,7 @@ public interface AuthDAO {
 
     AuthData getAuth(AuthData auth);
 
+    String getUsername(AuthData auth);
+
     void deleteAuth(AuthData auth);
 }

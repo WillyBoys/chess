@@ -26,11 +26,7 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public ArrayList<GameData> listGame() {
-        ArrayList<GameData> listGames = new ArrayList<>();
-        for (int i = 0; i < GameDB.size(); i++) {
-            listGames.add(GameDB.get(i));
-        }
-        return listGames;
+        return new ArrayList<>(GameDB.values());
     }
 
     @Override

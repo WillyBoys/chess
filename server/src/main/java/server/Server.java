@@ -7,6 +7,7 @@ import dataaccess.MemoryGameDAO;
 import dataaccess.MemoryUserDAO;
 import model.AuthData;
 import model.GameData;
+import model.JoinGameRequest;
 import model.UserData;
 import service.AuthService;
 import service.GameService;
@@ -54,96 +55,121 @@ public class Server {
             res.status(200);
             return new Gson().toJson(auth);
         } catch (DataAccessException error) {
-            String message = error.getMessage();
-            if (message.equals("Error: already taken")) {
-                res.status(403);
-                return new Gson().toJson(error);
-            }
-            if (message.equals("Error: bad request")) {
-                res.status(400);
-                return new Gson().toJson(error);
-            }
+            return handleError(res, error);
         }
-        res.status(500);
-        return new Gson().toJson("Error: unable to register user");
     }
 
     private Object loginUser(Request req, Response res) throws DataAccessException {
         res.type("application/json");
         try {
             var user = new Gson().fromJson(req.body(), UserData.class);
+
+            UserData storedUser = userDAO.getUser(user.username());
+            if (storedUser == null) {
+                res.status(401);
+                return new Gson().toJson(Map.of("message", "Error: unauthorized"));
+            }
+
+            if (!storedUser.password().equals(user.password())) {
+                res.status(401);
+                return new Gson().toJson(Map.of("message", "Error: unauthorized"));
+            }
+
             var auth = userServ.login(user);
+
+            System.out.println("Generated auth token: " + auth.authToken());
+
             res.status(200);
             return new Gson().toJson(auth);
         } catch (DataAccessException error) {
-            String message = error.getMessage();
-            if (message.equals("Error: unauthorized")) {
-                res.status(401);
-                return new Gson().toJson(error);
-            }
+            return handleError(res, error);
         }
-        res.status(500);
-        return new Gson().toJson("Error: unable to login");
-
     }
 
     private Object logoutUser(Request req, Response res) throws DataAccessException {
         res.type("application/json");
-        try {
-            var auth = new Gson().fromJson(req.body(), AuthData.class);
-            userServ.logout(auth);
-            res.status(200);
-            return "";
-        } catch (DataAccessException error) {
-            String message = error.getMessage();
-            if (message.equals("Error: unauthorized")) {
-                res.status(401);
-                return new Gson().toJson(error);
-            }
+
+        // Get the Authorization token from the headers
+        String auths = req.headers("Authorization");
+
+        // Handle missing or empty Authorization header
+        if (auths == null || auths.isEmpty()) {
+            res.status(401);
+            return new Gson().toJson(Map.of("message", "Error: unauthorized"));
         }
-        res.status(500);
-        return new Gson().toJson("Error: unable to logout");
+
+        // Create an AuthData object from the token
+        AuthData auth = new AuthData(auths, null);
+
+        // Check if the token exists in the AuthDB (indicating it's valid)
+        AuthData retrievedAuth = authDAO.getAuth(auth);
+        if (retrievedAuth == null) {
+            res.status(401);
+            return new Gson().toJson(Map.of("message", "Error: unauthorized"));
+        }
+
+        // Proceed with logout
+        userServ.logout(retrievedAuth);
+        res.status(200);  // Success: return 200 OK
+        return new Gson().toJson(Map.of());
     }
 
     private Object listGames(Request req, Response res) {
         res.type("application/json");
-        try {
-            var auth = new Gson().fromJson(req.body(), AuthData.class);
-            var list = gameServ.listGames(auth).toArray();
-            return new Gson().toJson(Map.of("game:", list));
-        } catch (DataAccessException error) {
-            String message = error.getMessage();
-            if (message.equals("Error: unauthorized")) {
-                res.status(401);
-                return new Gson().toJson(error);
-            }
+
+        String auths = req.headers("Authorization");
+
+        if (auths == null || auths.isEmpty()) {
+            res.status(401);
+            return new Gson().toJson(Map.of("message", "Error: unauthorized"));
         }
-        res.status(500);
-        return new Gson().toJson("Error: unable to list the games");
+
+        AuthData auth = new AuthData(auths, null);
+
+        try {
+            // Validate token
+            if (authDAO.getAuth(auth) == null) {
+                res.status(401);
+                return new Gson().toJson(Map.of("message", "Error: unauthorized"));
+            }
+
+            var list = gameServ.listGames(auth).toArray();
+            res.status(200);
+            return new Gson().toJson(Map.of("games", list));
+        } catch (DataAccessException error) {
+            res.status(500);
+            return new Gson().toJson(Map.of("message", "Error: " + error.getMessage()));
+        }
     }
 
     private Object createGame(Request req, Response res) throws DataAccessException {
         res.type("application/json");
-        try {
-            GameData info = new Gson().fromJson(req.body(), GameData.class);
-            String name = info.gameName();
-            var auth = new Gson().fromJson(req.body(), AuthData.class);
-            var id = gameServ.createGame(name, auth);
-            res.status(200);
-            return new Gson().toJson(id);
-        } catch (DataAccessException error) {
-            String message = error.getMessage();
-            if (message.equals("Error: unauthorized")) {
-                res.status(401);
-                return new Gson().toJson(error);
-            }
-            if (message.equals("Error: bad request")) {
-                res.status(400);
-                return new Gson().toJson(error);
-            }
+
+        // Get the Authorization token from the headers
+        String auths = req.headers("Authorization");
+
+        if (auths == null || auths.isEmpty()) {
+            res.status(401);
+            return new Gson().toJson(Map.of("message", "Authorization header is missing"));
         }
-        res.status(500);
-        return new Gson().toJson("Error: unable to create game");
+
+        AuthData auth = new AuthData(auths, null);
+
+        // Validate the token
+        if (authDAO.getAuth(auth) == null) {
+            res.status(401);
+            return new Gson().toJson(Map.of("message", "Invalid or expired Authorization token"));
+        }
+
+        GameData info = new Gson().fromJson(req.body(), GameData.class);
+        String gameName = info.gameName();
+
+        String username = authServ.getUsername(auth);
+        auth = new AuthData(auths, username);
+
+        int gameId = gameServ.createGame(gameName, auth);
+        res.status(200);
+        return new Gson().toJson(Map.of("gameID", gameId));
     }
 
     private Object joinGame(Request req, Response res) {
@@ -156,29 +182,16 @@ public class Server {
                 String user = info.blackUsername();
                 String color = "black";
                 gameServ.joinGame(gameName, user, color, auth);
-                return "";
             } else {
                 String user = info.whiteUsername();
                 String color = "white";
                 gameServ.joinGame(gameName, user, color, auth);
-                return "";
             }
+            res.status(200);
+            return "";
         } catch (DataAccessException error) {
-            if (error.equals("Error: unauthorized")) {
-                res.status(401);
-                return new Gson().toJson(error);
-            }
-            if (error.equals("Error: bad request")) {
-                res.status(400);
-                return new Gson().toJson(error);
-            }
-            if (error.equals("Error: already taken")) {
-                res.status(403);
-                return new Gson().toJson(error);
-            }
+            return handleError(res, error);
         }
-        res.status(500);
-        return new Gson().toJson("Error: unable to join game.");
     }
 
 
@@ -188,7 +201,21 @@ public class Server {
         gameServ.clear();
         userServ.clear();
         res.status(200);
-        return "";
+        return new Gson().toJson(Map.of());
+    }
+
+    private Object handleError(Response res, DataAccessException error) {
+        String message = error.getMessage();
+        if (message.equals("Error: unauthorized")) {
+            res.status(401);
+        } else if (message.equals("Error: bad request")) {
+            res.status(400);
+        } else if (message.equals("Error: already taken")) {
+            res.status(403);
+        } else {
+            res.status(500);
+        }
+        return new Gson().toJson(Map.of("message", message));
     }
 
     public void stop() {
