@@ -19,7 +19,11 @@ public class GameService {
         this.authDAO = authDAO;
     }
 
-    public Collection<GameData> listGames(AuthData auth) {
+    public Collection<GameData> listGames(AuthData auth) throws DataAccessException {
+        var info = authDAO.getAuth(auth);
+        if (info == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
         return gameDAO.listGame();
     }
 
@@ -29,7 +33,7 @@ public class GameService {
         GameData data = new GameData(id, null, null, game, board);
         var info = authDAO.getAuth(auth);
         if (info == null) {
-            throw new DataAccessException("Error: Unable to Create Game. You are not logged in.");
+            throw new DataAccessException("Error: unauthorized");
         }
         gameDAO.createGame(data);
         return id;
@@ -38,16 +42,22 @@ public class GameService {
     public void joinGame(String name, String playerName, String color, AuthData auth) throws DataAccessException {
         authDAO.getAuth(auth);
         if (auth == null) {
-            throw new DataAccessException("Not logged in");
+            throw new DataAccessException("Error: unauthorized");
         }
         GameData data = gameDAO.getGame(name);
         if (data == null) {
-            throw new DataAccessException("Game doesn't exist");
+            throw new DataAccessException("Error: bad request");
         }
         if (color.equals("black")) {
+            if (data.blackUsername() != null) {
+                throw new DataAccessException("Error: already taken");
+            }
             GameData game = new GameData(data.gameID(), data.whiteUsername(), playerName, data.gameName(), data.game());
             gameDAO.updateGame(game);
         } else {
+            if (data.whiteUsername() != null) {
+                throw new DataAccessException("Error: already taken");
+            }
             GameData game = new GameData(data.gameID(), playerName, data.blackUsername(), data.gameName(), data.game());
             gameDAO.updateGame(game);
         }

@@ -19,28 +19,39 @@ public class UserService {
     }
 
     public AuthData register(UserData user) throws DataAccessException {
+        if (user.username() == null || user.password() == null || user.email() == null) {
+            throw new DataAccessException("Error: bad request");
+        }
         UserData data = userDAO.getUser(user.username());
         if (data != null) {
             throw new DataAccessException("Error: already taken");
         }
         userDAO.createUser(user);
         AuthData auth = authDAO.createAuth(user.username());
+        if (auth == null) {
+            throw new DataAccessException(("Error: bad request"));
+        }
         return authDAO.getAuth(auth);
     }
 
     public AuthData login(UserData user) throws DataAccessException {
         var info = userDAO.getUser(user.username());
         if (info == null) {
-            throw new DataAccessException("Login Error: The username or password is incorrect");
+            throw new DataAccessException("Error: unauthorized");
         }
-        AuthData auth = authDAO.createAuth(user.username());
-        return authDAO.getAuth(auth);
+        String password = info.password();
+        if (password.equals(user.password())) {
+            AuthData auth = authDAO.createAuth(user.username());
+            return authDAO.getAuth(auth);
+        } else {
+            throw new DataAccessException("Error: unauthorized");
+        }
     }
 
     public void logout(AuthData auth) throws DataAccessException {
         var info = authDAO.getAuth(auth);
         if (info == null) {
-            throw new DataAccessException("Logout Error: Unable to log out");
+            throw new DataAccessException("Error: unauthorized");
         }
         authDAO.deleteAuth(auth);
     }

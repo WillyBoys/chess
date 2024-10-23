@@ -9,5 +9,9 @@ public class AuthService {
         this.authDAO = authDAO;
     }
 
+    public void clear() {
+        authDAO.clear();
+    }
+
 
 }
