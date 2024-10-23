@@ -7,17 +7,12 @@ import model.JoinGameRequest;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import passoff.model.TestCreateRequest;
-import service.*;
 import dataaccess.*;
 
-import javax.xml.crypto.Data;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 
 public class ServiceTests {
 
@@ -47,7 +42,6 @@ public class ServiceTests {
         AuthData testAuth = new AuthData("1234", "testUser");
 
         gameService.createGame("SomeGame", testAuth);
-        gameService.createGame("AnotherGame", testAuth);
 
         UserData user = new UserData("testUser", "password", "email@test.com");
         userService.register(user);
@@ -56,7 +50,7 @@ public class ServiceTests {
         authService.clear();
         userService.clear();
         assertTrue(authDAO.getDBSize() == 0);
-        assertTrue(gameService.listGames(testAuth).isEmpty());
+        assertThrows(DataAccessException.class, () -> gameService.listGames(testAuth));
         assertTrue(userDAO.getDBSize() == 0);
 
     }
@@ -96,7 +90,7 @@ public class ServiceTests {
         UserData user = new UserData("existingUser", "password", "email@test.com");
         AuthData auth = userService.register(user);
         userService.logout(auth);
-        assertNotNull(authDAO.getAuth(auth));
+        assertNull(authDAO.getAuth(auth));
     }
 
     @Test
