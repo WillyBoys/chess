@@ -189,8 +189,9 @@ public class ChessGame {
                 ChessPiece tempPiece = board.getPiece(tempPos);
                 if (tempPiece != null && tempPiece.getTeamColor() == teamColor) {
                     moves = validMoves(tempPos);
-                    if (!checker(board, moves, tempPiece))
+                    if (!checker(board, moves, tempPiece)) {
                         return false;
+                    }
                 }
             }
         }
@@ -234,19 +235,7 @@ public class ChessGame {
                 ChessPiece tempPiece = board.getPiece(tempPos);
                 if (tempPiece != null && tempPiece.getTeamColor() == teamColor) {
                     moves = validMoves(tempPos);
-                    for (ChessMove move : moves) {
-                        ChessPosition tempStart = move.getStartPosition();
-                        ChessPosition tempFinal = move.getEndPosition();
-                        ChessPiece tempDead = board.getPiece(tempFinal);
-                        board.addPiece(tempFinal, tempPiece);
-                        board.addPiece(tempStart, null);
-                        boolean check = isInCheck(tempPiece.teamColor);
-                        if (!check) {
-                            validMoves.add(move);
-                        }
-                        board.addPiece(tempStart, tempPiece);
-                        board.addPiece(tempFinal, tempDead);
-                    }
+                    validMoves.addAll(staler(board, moves, validMoves, tempPiece));
                 }
             }
         }
@@ -254,6 +243,23 @@ public class ChessGame {
             return true;
         }
         return false;
+    }
+
+    public Collection<ChessMove> staler(ChessBoard board, Collection<ChessMove> moves, Collection<ChessMove> validMoves, ChessPiece tempPiece) {
+        for (ChessMove move : moves) {
+            ChessPosition tempStart = move.getStartPosition();
+            ChessPosition tempFinal = move.getEndPosition();
+            ChessPiece tempDead = board.getPiece(tempFinal);
+            board.addPiece(tempFinal, tempPiece);
+            board.addPiece(tempStart, null);
+            boolean check = isInCheck(tempPiece.teamColor);
+            if (!check) {
+                validMoves.add(move);
+            }
+            board.addPiece(tempStart, tempPiece);
+            board.addPiece(tempFinal, tempDead);
+        }
+        return validMoves;
     }
 
     /**
