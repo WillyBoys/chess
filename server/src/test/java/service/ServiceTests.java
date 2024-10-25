@@ -26,7 +26,7 @@ public class ServiceTests {
     private String existingAuth;
 
     @BeforeEach
-    public void Setup() {
+    public void setup() {
         this.userDAO = new MemoryUserDAO();
         this.authDAO = new MemoryAuthDAO();
         this.gameDAO = new MemoryGameDAO();

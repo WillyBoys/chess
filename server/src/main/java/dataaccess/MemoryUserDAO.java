@@ -5,24 +5,24 @@ import model.UserData;
 import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO {
-    HashMap<String, UserData> UserDB = new HashMap<>();
+    HashMap<String, UserData> userDB = new HashMap<>();
 
     @Override
     public void clear() {
-        UserDB.clear();
+        userDB.clear();
     }
 
     @Override
     public void createUser(UserData user) {
-        UserDB.put(user.username(), user);
+        userDB.put(user.username(), user);
     }
 
     @Override
     public model.UserData getUser(String username) {
-        return UserDB.get(username);
+        return userDB.get(username);
     }
 
     public int getDBSize() {
-        return UserDB.size();
+        return userDB.size();
     }
 }

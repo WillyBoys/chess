@@ -6,31 +6,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MemoryGameDAO implements GameDAO {
-    HashMap<Object, GameData> GameDB = new HashMap<>();
+    HashMap<Object, GameData> gameDB = new HashMap<>();
 
     @Override
     public void clear() {
-        GameDB.clear();
+        gameDB.clear();
     }
 
     @Override
     public int createGame(GameData game) {
-        GameDB.put(game.gameID(), game);
+        gameDB.put(game.gameID(), game);
         return game.gameID();
     }
 
     @Override
     public GameData getGame(int gameID) {
-        return GameDB.get(gameID);
+        return gameDB.get(gameID);
     }
 
     @Override
     public ArrayList<GameData> listGame() {
-        return new ArrayList<>(GameDB.values());
+        return new ArrayList<>(gameDB.values());
     }
 
     @Override
     public void updateGame(GameData data) {
-        GameDB.put(data.gameID(), data);
+        gameDB.put(data.gameID(), data);
     }
 }
