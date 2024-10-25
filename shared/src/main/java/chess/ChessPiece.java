@@ -290,96 +290,23 @@ public class ChessPiece {
         ArrayList<ChessMove> moves = new ArrayList<>();
         int row = position.getRow();
         int col = position.getColumn();
-        int tmprow = -1;
-        int tmpcol = -1;
 
         //Up Right
-        tmprow = row + 1;
-        tmpcol = col + 1;
-        if (tmprow <= 8 && tmpcol <= 8) {
-            ChessPosition endPosition = new ChessPosition(tmprow, tmpcol);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-        }
-
+        moves.addAll(knightMoves(board, position, row + 1, col + 1));
         //Up Left
-        tmprow = row + 1;
-        tmpcol = col - 1;
-        if (tmprow <= 8 && tmpcol >= 1) {
-            ChessPosition endPosition = new ChessPosition(tmprow, tmpcol);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-        }
-
+        moves.addAll(knightMoves(board, position, row + 1, col - 1));
         //Down Right
-        tmprow = row - 1;
-        tmpcol = col + 1;
-        if (tmprow >= 1 && tmpcol <= 8) {
-            ChessPosition endPosition = new ChessPosition(tmprow, tmpcol);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-        }
-
+        moves.addAll(knightMoves(board, position, row - 1, col + 1));
         //Down Left
-        tmprow = row - 1;
-        tmpcol = col - 1;
-        if (tmprow >= 1 && tmpcol >= 1) {
-            ChessPosition endPosition = new ChessPosition(tmprow, tmpcol);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-        }
-
+        moves.addAll(knightMoves(board, position, row - 1, col - 1));
         //Up
-        tmprow = row + 1;
-        tmpcol = col;
-        if (tmprow <= 8) {
-            ChessPosition endPosition = new ChessPosition(tmprow, tmpcol);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-        }
-
+        moves.addAll(knightMoves(board, position, row + 1, col));
         //Down
-        tmprow = row - 1;
-        tmpcol = col;
-        if (tmprow >= 1) {
-            ChessPosition endPosition = new ChessPosition(tmprow, tmpcol);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-        }
-
+        moves.addAll(knightMoves(board, position, row - 1, col));
         //Right
-        tmprow = row;
-        tmpcol = col + 1;
-        if (tmpcol <= 8) {
-            ChessPosition endPosition = new ChessPosition(tmprow, tmpcol);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-        }
-
+        moves.addAll(knightMoves(board, position, row, col + 1));
         //Left
-        tmprow = row;
-        tmpcol = col - 1;
-        if (tmpcol >= 1) {
-            ChessPosition endPosition = new ChessPosition(tmprow, tmpcol);
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null || piece.getTeamColor() != getTeamColor()) {
-                moves.add(new ChessMove(position, endPosition, null));
-            }
-        }
+        moves.addAll(knightMoves(board, position, row, col - 1));
         return moves;
     }
 
