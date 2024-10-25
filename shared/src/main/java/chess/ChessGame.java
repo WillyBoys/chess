@@ -128,16 +128,23 @@ public class ChessGame {
                 ChessPiece piece = board.getPiece(current);
                 if (piece != null && piece.getTeamColor() != teamColor) {
                     //Run through all the moves the opposing team can make and see if they match the current position
-                    Collection<ChessMove> moves = piece.pieceMoves(board, current);
-                    for (ChessMove move : moves) {
-                        if (move.getEndPosition().equals(kingPosition)) {
-                            return true;
-                        }
+                    if (runThrough(board, piece, current, kingPosition)) {
+                        return true;
                     }
                 }
             }
         }
 
+        return false;
+    }
+
+    public boolean runThrough(ChessBoard board, ChessPiece piece, ChessPosition current, ChessPosition kingPosition) {
+        Collection<ChessMove> moves = piece.pieceMoves(board, current);
+        for (ChessMove move : moves) {
+            if (move.getEndPosition().equals(kingPosition)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -182,21 +189,28 @@ public class ChessGame {
                 ChessPiece tempPiece = board.getPiece(tempPos);
                 if (tempPiece != null && tempPiece.getTeamColor() == teamColor) {
                     moves = validMoves(tempPos);
-                    for (ChessMove move : moves) {
-                        ChessPosition tempStart = move.getStartPosition();
-                        ChessPosition tempFinal = move.getEndPosition();
-                        ChessPiece tempDead = board.getPiece(tempFinal);
-                        board.addPiece(tempFinal, tempPiece);
-                        board.addPiece(tempStart, null);
-                        boolean check = isInCheck(tempPiece.teamColor);
-                        if (!check) {
-                            return false;
-                        }
-                        board.addPiece(tempStart, tempPiece);
-                        board.addPiece(tempFinal, tempDead);
-                    }
+                    if (!checker(board, moves, tempPiece))
+                        return false;
                 }
             }
+        }
+        return true;
+    }
+
+    public boolean checker(ChessBoard board, Collection<ChessMove> moves, ChessPiece tempPiece) {
+
+        for (ChessMove move : moves) {
+            ChessPosition tempStart = move.getStartPosition();
+            ChessPosition tempFinal = move.getEndPosition();
+            ChessPiece tempDead = board.getPiece(tempFinal);
+            board.addPiece(tempFinal, tempPiece);
+            board.addPiece(tempStart, null);
+            boolean check = isInCheck(tempPiece.teamColor);
+            if (!check) {
+                return false;
+            }
+            board.addPiece(tempStart, tempPiece);
+            board.addPiece(tempFinal, tempDead);
         }
         return true;
     }
