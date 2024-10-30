@@ -1,7 +1,12 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
+
 import java.sql.*;
 import java.util.Properties;
+
+import static java.sql.Types.NULL;
 
 public class DatabaseManager {
     private static final String DATABASE_NAME;
@@ -48,6 +53,22 @@ public class DatabaseManager {
         }
     }
 
+    //LOOK INTO SQL COMMIT AND ROLLBACK
+
+    static void configureDatabase() throws DataAccessException {
+        createDatabase();
+        //Create SQL Statements to create tables (need 3 for the three different tables)
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+
+
+    }
+
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should
@@ -65,6 +86,30 @@ public class DatabaseManager {
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
             conn.setCatalog(DATABASE_NAME);
             return conn;
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    static int executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
+                    else if (param instanceof ChessGame p) ps.setString(i + 1, new Gson().toJson(p));
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                ps.executeUpdate();
+
+                var rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+
+                return 0;
+            }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }

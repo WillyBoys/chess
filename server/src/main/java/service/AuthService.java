@@ -1,7 +1,7 @@
 package service;
 
 import dataaccess.AuthDAO;
-import dataaccess.MemoryAuthDAO;
+import dataaccess.DataAccessException;
 import model.AuthData;
 
 public class AuthService {
@@ -11,7 +11,7 @@ public class AuthService {
         this.authDAO = authDAO;
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         authDAO.clear();
     }
 
