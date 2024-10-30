@@ -55,11 +55,19 @@ public class DatabaseManager {
 
     //LOOK INTO SQL COMMIT AND ROLLBACK
 
-    static void configureDatabase() throws DataAccessException {
+    public static void configureDatabase() throws DataAccessException {
         createDatabase();
-        //Create SQL Statements to create tables (need 3 for the three different tables)
+        var userStatement = "CREATE TABLE IF NOT EXISTS User (username varchar(255), password varchar(255), email varchar(255))";
+        var authStatement = "CREATE TABLE IF NOT EXISTS Auth (authToken varchar(255), username varchar(255))";
+        var gameStatement = "CREATE TABLE IF NOT EXISTS Game (gameID int, whiteUsername varchar(255), blackUsername varchar(255), gameName varchar(255), game varchar(255))";
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement(statement)) {
+            try (var preparedStatement = conn.prepareStatement(userStatement)) {
+                preparedStatement.executeUpdate();
+            }
+            try (var preparedStatement = conn.prepareStatement(authStatement)) {
+                preparedStatement.executeUpdate();
+            }
+            try (var preparedStatement = conn.prepareStatement(gameStatement)) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
@@ -86,30 +94,6 @@ public class DatabaseManager {
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
             conn.setCatalog(DATABASE_NAME);
             return conn;
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
-    }
-
-    static int executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
-                for (var i = 0; i < params.length; i++) {
-                    var param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param instanceof ChessGame p) ps.setString(i + 1, new Gson().toJson(p));
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
-
-                var rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-
-                return 0;
-            }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }

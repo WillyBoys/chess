@@ -1,10 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.MemoryUserDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.JoinGameRequest;
@@ -13,17 +10,26 @@ import service.AuthService;
 import service.GameService;
 import service.UserService;
 import spark.*;
+import dataaccess.DatabaseManager;
 
 import javax.xml.crypto.Data;
 import java.util.Map;
 
 public class Server {
     MemoryUserDAO userDAO = new MemoryUserDAO();
-    MemoryAuthDAO authDAO = new MemoryAuthDAO();
+    SqlAuthDAO authDAO = new SqlAuthDAO();
     MemoryGameDAO gameDAO = new MemoryGameDAO();
     AuthService authServ = new AuthService(authDAO);
     UserService userServ = new UserService(userDAO, authDAO);
     GameService gameServ = new GameService(gameDAO, authDAO);
+
+    public Server() {
+        try {
+            DatabaseManager.configureDatabase();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public int run(int desiredPort) {
 
@@ -191,7 +197,7 @@ public class Server {
     }
 
 
-    private Object clear(Request req, Response res) {
+    private Object clear(Request req, Response res) throws DataAccessException {
         res.type("application/json");
         authServ.clear();
         gameServ.clear();
