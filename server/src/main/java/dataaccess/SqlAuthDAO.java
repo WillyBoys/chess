@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.AuthData;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -78,9 +79,10 @@ public class SqlAuthDAO implements AuthDAO {
     @Override
     public void deleteAuth(AuthData auth) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "DELETE * FROM Auth WHERE authToken=?";
+            var statement = "DELETE FROM Auth WHERE authToken=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, auth.authToken());
+                ps.executeUpdate();
             }
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
