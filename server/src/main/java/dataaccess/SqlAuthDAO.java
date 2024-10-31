@@ -1,11 +1,9 @@
 package dataaccess;
 
-import com.google.gson.Gson;
 import model.AuthData;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.UUID;
 
 public class SqlAuthDAO implements AuthDAO {
