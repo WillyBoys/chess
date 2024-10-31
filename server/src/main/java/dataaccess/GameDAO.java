@@ -12,9 +12,9 @@ public interface GameDAO {
 
     int createGame(GameData game) throws DataAccessException;
 
-    GameData getGame(int gameID);
+    GameData getGame(int gameID) throws DataAccessException;
 
-    ArrayList<GameData> listGame();
+    ArrayList<GameData> listGame() throws DataAccessException;
 
-    void updateGame(GameData data);
+    void updateGame(GameData data) throws DataAccessException;
 }

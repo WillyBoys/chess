@@ -59,7 +59,7 @@ public class DatabaseManager {
         createDatabase();
         var userStatement = "CREATE TABLE IF NOT EXISTS User (username varchar(255), password varchar(255), email varchar(255))";
         var authStatement = "CREATE TABLE IF NOT EXISTS Auth (authToken varchar(255), username varchar(255))";
-        var gameStatement = "CREATE TABLE IF NOT EXISTS Game (gameID int, whiteUsername varchar(255), blackUsername varchar(255), gameName varchar(255), game varchar(255))";
+        var gameStatement = "CREATE TABLE IF NOT EXISTS Game (`gameID` int NOT NULL AUTO_INCREMENT, whiteUsername varchar(255), blackUsername varchar(255), gameName varchar(255), game varchar(255))";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(userStatement)) {
                 preparedStatement.executeUpdate();
