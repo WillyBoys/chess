@@ -16,7 +16,7 @@ import javax.xml.crypto.Data;
 import java.util.Map;
 
 public class Server {
-    MemoryUserDAO userDAO = new MemoryUserDAO();
+    SqlUserDAO userDAO = new SqlUserDAO();
     SqlAuthDAO authDAO = new SqlAuthDAO();
     SqlGameDAO gameDAO = new SqlGameDAO();
     AuthService authServ = new AuthService(authDAO);
