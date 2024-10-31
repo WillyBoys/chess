@@ -115,9 +115,13 @@ public class Server {
         }
 
         // Proceed with logout
-        userServ.logout(retrievedAuth);
-        res.status(200);  // Success: return 200 OK
-        return new Gson().toJson(Map.of());
+        try {
+            userServ.logout(retrievedAuth);
+            res.status(200);  // Success: return 200 OK
+            return new Gson().toJson(Map.of());
+        } catch (DataAccessException e) {
+            return handleError(res, e);
+        }
     }
 
     private Object listGames(Request req, Response res) {
