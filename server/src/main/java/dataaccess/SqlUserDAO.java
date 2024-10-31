@@ -1,36 +1,73 @@
 package dataaccess;
 
 import model.AuthData;
+import model.UserData;
 
-public class SqlUserDAO implements AuthDAO {
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+public class SqlUserDAO implements UserDAO {
 
     @Override
-    public void clear() {
-
+    public void clear() throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = conn.prepareStatement("TRUNCATE TABLE user");
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override
-    public AuthData createAuth(String username) {
+    public void createUser(UserData data) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = conn.prepareStatement("INSERT INTO user (username, password, email) VALUES (?, ?, ?)");
+            statement.setString(1, data.email());
+            statement.setString(2, data.password());
+            statement.setString(3, data.email());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public UserData getUser(String username) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM user WHERE username=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String usernamer = rs.getString("username");
+                        String password = rs.getString("password");
+                        String email = rs.getString("email");
+                        return new UserData(usernamer, password, email);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
         return null;
     }
 
     @Override
-    public AuthData getAuth(AuthData auth) {
-        return null;
-    }
-
-    @Override
-    public String getUsername(AuthData auth) {
-        return "";
-    }
-
-    @Override
-    public void deleteAuth(AuthData auth) {
-
-    }
-
-    @Override
-    public int getDBSize() {
-        return 0;
+    public int getDBSize() throws DataAccessException {
+        ArrayList<String> db = new ArrayList<>();
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM user";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        String username = rs.getString("username");
+                        db.add(username);
+                    }
+                    return db.size();
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 }
