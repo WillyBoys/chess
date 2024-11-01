@@ -72,7 +72,7 @@ public class ServiceTests {
     @Test
     public void loginSuccess() throws DataAccessException {
         UserData user = new UserData("existingUser", "password", "email@test.com");
-        userDAO.createUser(user);
+        userService.register(user);
         AuthData authData = userService.login(user);
         assertNotNull(authData);
     }
@@ -80,7 +80,7 @@ public class ServiceTests {
     @Test
     public void loginFail() throws DataAccessException {
         UserData user = new UserData("existingUser", "wrongPassword", "email@test.com");
-        userDAO.createUser(new UserData("existingUser", "password", "email@test.com"));
+        userService.register(new UserData("existingUser", "password", "email@test.com"));
         assertThrows(DataAccessException.class, () -> userService.login(user));
     }
 

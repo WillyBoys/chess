@@ -6,6 +6,7 @@ import model.AuthData;
 import model.GameData;
 import model.JoinGameRequest;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -76,7 +77,7 @@ public class Server {
                 return new Gson().toJson(Map.of("message", "Error: unauthorized"));
             }
 
-            if (!storedUser.password().equals(user.password())) {
+            if (!BCrypt.checkpw(user.password(), storedUser.password())) {
                 res.status(401);
                 return new Gson().toJson(Map.of("message", "Error: unauthorized"));
             }
