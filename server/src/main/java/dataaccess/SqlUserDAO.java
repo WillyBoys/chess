@@ -20,6 +20,9 @@ public class SqlUserDAO implements UserDAO {
 
     @Override
     public void createUser(UserData data) throws DataAccessException {
+        if (data == null) {
+            throw new DataAccessException("Error: bad request");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = conn.prepareStatement("INSERT INTO User (username, password, email) VALUES (?, ?, ?)");
             statement.setString(1, data.username());
@@ -33,6 +36,9 @@ public class SqlUserDAO implements UserDAO {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
+        if (username == null) {
+            throw new DataAccessException("Error: bad request");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM User WHERE username=?";
             try (var ps = conn.prepareStatement(statement)) {

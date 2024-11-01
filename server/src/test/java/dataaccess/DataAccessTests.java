@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
+import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.AuthService;
@@ -92,12 +93,57 @@ public class DataAccessTests {
     }
 
     @Test
-    public void getDBSizeSuccess() throws DataAccessException {
+    public void getAuthDBSizeSuccess() throws DataAccessException {
         authDAO.createAuth("testUser1");
         authDAO.createAuth("testUser2");
         assertEquals(authDAO.getDBSize(), 2);
     }
 
     //SQL User Tests
-    
+    @Test
+    public void userClear() throws DataAccessException {
+        UserData testUser = new UserData("testUser", "testPassword", "user@email.com");
+        userDAO.createUser(testUser);
+
+        userDAO.clear();
+
+        assertEquals(0, userDAO.getDBSize());
+    }
+
+    @Test
+    public void createUserSuccess() throws DataAccessException {
+        UserData testUser = new UserData("testUser", "testPassword", "user@email.com");
+        userDAO.createUser(testUser);
+
+        assertEquals(1, userDAO.getDBSize());
+    }
+
+    @Test
+    public void createUserFail() {
+        assertThrows(DataAccessException.class, () -> userDAO.createUser(null));
+    }
+
+    @Test
+    public void getUserSuccess() throws DataAccessException {
+        UserData testUser = new UserData("testUser", "testPassword", "user@email.com");
+        userDAO.createUser(testUser);
+        UserData received = userDAO.getUser("testUser");
+
+        assertEquals(testUser, received);
+
+    }
+
+    @Test
+    public void getUserFail() throws DataAccessException {
+        assertThrows(DataAccessException.class, () -> userDAO.getUser(null));
+    }
+
+    @Test
+    public void getUserDBSizeSuccess() throws DataAccessException {
+        UserData testUser = new UserData("testUser", "testPassword", "user@email.com");
+        UserData testUser2 = new UserData("testUser2", "testPassword2", "user2@email.com");
+        userDAO.createUser(testUser);
+        userDAO.createUser(testUser2);
+        assertEquals(userDAO.getDBSize(), 2);
+    }
 }
