@@ -22,6 +22,9 @@ public class SqlGameDAO implements GameDAO {
 
     @Override
     public int createGame(GameData game) throws DataAccessException {
+        if (game == null) {
+            throw new DataAccessException("Error: bad request");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = conn.prepareStatement("INSERT INTO Game (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)");
             statement.setInt(1, game.gameID());
@@ -52,13 +55,14 @@ public class SqlGameDAO implements GameDAO {
                         String gameName = rs.getString("gameName");
                         ChessGame from = new Gson().fromJson(rs.getString("game"), ChessGame.class);
                         return new GameData(gameID, whiteUsername, blackUsername, gameName, from);
+                    } else {
+                        throw new DataAccessException("Error: bad request");
                     }
                 }
             }
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
-        return null;
     }
 
     @Override
@@ -87,6 +91,9 @@ public class SqlGameDAO implements GameDAO {
 
     @Override
     public void updateGame(GameData data) throws DataAccessException {
+        if (data == null) {
+            throw new DataAccessException("Error: bad request");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = conn.prepareStatement("UPDATE Game SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID = ?");
             statement.setString(1, data.whiteUsername());

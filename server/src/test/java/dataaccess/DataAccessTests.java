@@ -1,6 +1,8 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -145,5 +147,76 @@ public class DataAccessTests {
         userDAO.createUser(testUser);
         userDAO.createUser(testUser2);
         assertEquals(userDAO.getDBSize(), 2);
+    }
+
+    //SQL Game Tests
+    @Test
+    public void gameClear() throws DataAccessException {
+        ChessGame game = new ChessGame();
+        GameData testGame = new GameData(1, "white", "black", "game", game);
+        gameDAO.createGame(testGame);
+
+        gameDAO.clear();
+
+        assertEquals(0, gameDAO.listGame().size());
+    }
+
+    @Test
+    public void createGameSuccess() throws DataAccessException {
+        ChessGame game = new ChessGame();
+        GameData testGame = new GameData(1, "white", "black", "game", game);
+        gameDAO.createGame(testGame);
+
+        assertEquals(1, gameDAO.listGame().size());
+    }
+
+    @Test
+    public void createGameFail() {
+        assertThrows(DataAccessException.class, () -> gameDAO.createGame(null));
+    }
+
+    @Test
+    public void getGameSuccess() throws DataAccessException {
+        ChessGame game = new ChessGame();
+        GameData testGame = new GameData(1, "white", "black", "game", game);
+        int id = gameDAO.createGame(testGame);
+
+        assertEquals(id, testGame.gameID());
+    }
+
+    @Test
+    public void getGameFail() {
+        assertThrows(DataAccessException.class, () -> gameDAO.getGame(3));
+    }
+
+    @Test
+    public void listGameSuccess() throws DataAccessException {
+        ChessGame game = new ChessGame();
+        GameData testGame = new GameData(1, "white", "black", "game", game);
+        gameDAO.createGame(testGame);
+        ChessGame game2 = new ChessGame();
+        GameData testGame2 = new GameData(2, "black", "white", "game2", game2);
+        gameDAO.createGame(testGame2);
+
+        assertEquals(gameDAO.listGame().size(), 2);
+    }
+
+    @Test
+    public void updateGameSuccess() throws DataAccessException {
+        ChessGame game = new ChessGame();
+        GameData testGame = new GameData(1, null, "black", "game", game);
+        gameDAO.createGame(testGame);
+
+        GameData joinGame = new GameData(1, "testUser", "black", "game", game);
+        gameDAO.updateGame(joinGame);
+
+        GameData fullGame = new GameData(1, "testUser", "black", "game", game);
+
+        assertEquals(fullGame, gameDAO.getGame(1));
+    }
+
+    @Test
+    public void updateGameFail() {
+        assertThrows(DataAccessException.class, () -> gameDAO.updateGame(null));
     }
 }
