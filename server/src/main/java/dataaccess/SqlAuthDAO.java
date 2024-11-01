@@ -42,6 +42,9 @@ public class SqlAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getAuth(AuthData auth) throws DataAccessException {
+        if (auth == null) {
+            throw new DataAccessException("Error: bad request");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM Auth WHERE authToken=?";
             try (var ps = conn.prepareStatement(statement)) {

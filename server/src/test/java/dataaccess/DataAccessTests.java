@@ -9,8 +9,7 @@ import service.UserService;
 
 import javax.xml.crypto.Data;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DataAccessTests {
 
@@ -41,17 +40,64 @@ public class DataAccessTests {
 
         authDAO.clear();
 
-        assertTrue(authDAO.getDBSize() == 0);
+        assertEquals(0, authDAO.getDBSize());
     }
 
     @Test
     public void createAuthSuccess() throws DataAccessException {
         authDAO.createAuth("testUser");
-        assertTrue(authDAO.getDBSize() == 1);
+        assertEquals(1, authDAO.getDBSize());
     }
 
     @Test
     public void createAuthFail() throws DataAccessException {
         assertThrows(DataAccessException.class, () -> authDAO.createAuth(null));
     }
+
+    @Test
+    public void getAuthSuccess() throws DataAccessException {
+        AuthData stuff = authDAO.createAuth("testUser");
+        AuthData retrieved = authDAO.getAuth(stuff);
+        assertEquals(stuff, retrieved);
+    }
+
+    @Test
+    public void getAuthFail() {
+        assertThrows(DataAccessException.class, () -> authDAO.getAuth(null));
+    }
+
+    @Test
+    public void getUsernameSuccess() throws DataAccessException {
+        AuthData testAuth = authDAO.createAuth("testAuth");
+        assertEquals(authDAO.getUsername(testAuth), "testAuth");
+    }
+
+    @Test
+    public void getUsernameFail() {
+        assertThrows(DataAccessException.class, () -> authDAO.getUsername(null));
+    }
+
+    @Test
+    public void deleteAuthSuccess() throws DataAccessException {
+        AuthData testAuth = authDAO.createAuth("testUser");
+
+        authDAO.deleteAuth(testAuth);
+
+        assertEquals(0, authDAO.getDBSize());
+    }
+
+    @Test
+    public void deleteAuthFail() {
+        assertThrows(DataAccessException.class, () -> authDAO.deleteAuth(null));
+    }
+
+    @Test
+    public void getDBSizeSuccess() throws DataAccessException {
+        authDAO.createAuth("testUser1");
+        authDAO.createAuth("testUser2");
+        assertEquals(authDAO.getDBSize(), 2);
+    }
+
+    //SQL User Tests
+    
 }
