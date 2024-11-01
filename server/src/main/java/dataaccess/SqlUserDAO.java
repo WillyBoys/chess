@@ -11,7 +11,7 @@ public class SqlUserDAO implements UserDAO {
     @Override
     public void clear() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = conn.prepareStatement("TRUNCATE TABLE user");
+            var statement = conn.prepareStatement("TRUNCATE TABLE User");
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
@@ -21,8 +21,8 @@ public class SqlUserDAO implements UserDAO {
     @Override
     public void createUser(UserData data) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = conn.prepareStatement("INSERT INTO user (username, password, email) VALUES (?, ?, ?)");
-            statement.setString(1, data.email());
+            var statement = conn.prepareStatement("INSERT INTO User (username, password, email) VALUES (?, ?, ?)");
+            statement.setString(1, data.username());
             statement.setString(2, data.password());
             statement.setString(3, data.email());
             statement.executeUpdate();
@@ -34,7 +34,7 @@ public class SqlUserDAO implements UserDAO {
     @Override
     public UserData getUser(String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT * FROM user WHERE username=?";
+            var statement = "SELECT * FROM User WHERE username=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (var rs = ps.executeQuery()) {
@@ -56,7 +56,7 @@ public class SqlUserDAO implements UserDAO {
     public int getDBSize() throws DataAccessException {
         ArrayList<String> db = new ArrayList<>();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT * FROM user";
+            var statement = "SELECT * FROM User";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
