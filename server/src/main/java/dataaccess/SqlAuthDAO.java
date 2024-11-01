@@ -25,6 +25,9 @@ public class SqlAuthDAO implements AuthDAO {
 
     @Override
     public AuthData createAuth(String username) throws DataAccessException {
+        if (username == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             String token = generateToken();
             var statement = conn.prepareStatement("INSERT INTO Auth (authToken, username) VALUES (?, ?)");

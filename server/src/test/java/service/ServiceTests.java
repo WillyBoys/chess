@@ -23,8 +23,6 @@ public class ServiceTests {
     private GameDAO gameDAO;
     private UserDAO userDAO;
 
-    private String existingAuth;
-
     @BeforeEach
     public void setup() {
         this.userDAO = new MemoryUserDAO();
