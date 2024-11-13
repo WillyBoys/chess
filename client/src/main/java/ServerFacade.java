@@ -1,3 +1,4 @@
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 
@@ -8,6 +9,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.Collection;
 
 public class ServerFacade {
 
@@ -19,40 +21,42 @@ public class ServerFacade {
 
     public void registerUser() throws ResponseException {
         var path = "/user";
-        this.makeRequest("POST", path);
+        this.makeRequest("POST", path, null, null);
     }
 
     public void loginUser() throws ResponseException {
         var path = "/session";
-        this.makeRequest("POST", path);
+        this.makeRequest("POST", path, null, null);
     }
 
     public void logoutUser() throws ResponseException {
         var path = "/session";
-        this.makeRequest("DELETE", path);
+        this.makeRequest("DELETE", path, null, null);
     }
 
-    public void listGames() throws ResponseException {
+    public Collection<ChessGame> listGames() throws ResponseException {
         var path = "/game";
-        this.makeRequest("GET", path);
+        Collection<ChessGame> gameList = this.makeRequest("GET", path, null, null);
+        return gameList;
     }
 
     public void createGame() throws ResponseException {
         var path = "/game";
-        this.makeRequest("POST", path);
+        this.makeRequest("POST", path, null, null);
     }
 
     public void joinGame() throws ResponseException {
         var path = "/game";
-        this.makeRequest("PUT", path);
+        this.makeRequest("PUT", path, null, null);
     }
 
     public void clear() throws ResponseException {
         var path = "/db";
-        this.makeRequest("DELETE", path);
+        this.makeRequest("DELETE", path, null, null
+        );
     }
 
-    private <T> T makeRequest(String method, String path) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -96,5 +100,9 @@ public class ServerFacade {
             }
         }
         return response;
+    }
+
+    private boolean isSuccessful(int status) {
+        return status / 100 == 2;
     }
 }
