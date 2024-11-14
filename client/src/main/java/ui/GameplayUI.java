@@ -15,6 +15,8 @@ public class GameplayUI {
     private static final int SQUARE_SIZE = 2;
     private static int tracker = 0;
     public static boolean playerWhite = true;
+    private static int letterTracker = 0;
+    private static int letterTrackerAfter = 0;
 
 
     // Padded characters.
@@ -26,10 +28,12 @@ public class GameplayUI {
 
         out.print(ERASE_SCREEN);
 
+        printEmptyBlack(out);
         drawHeaders(out);
 
         drawChessBoard(out);
 
+        printEmptyBlack(out);
         drawHeaders(out);
 
         out.print(SET_BG_COLOR_BLACK);
@@ -39,16 +43,20 @@ public class GameplayUI {
     private static void drawHeaders(PrintStream out) {
 
         setBlack(out);
-        String[] whiteHeaders = {" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
-        String[] blackHeaders = {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
+        String[] whiteHeaders = {" A ", " B ", " C ", " D ", " E ", " F ", " G ", " H "};
+        String[] blackHeaders = {" H ", " G ", " F ", " E ", " D ", " C ", " B ", " A "};
         if (playerWhite) {
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
                 drawHeader(out, whiteHeaders[boardCol]);
             }
+            printEmptyBlack(out);
+
         } else {
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
                 drawHeader(out, blackHeaders[boardCol]);
             }
+            printEmptyBlack(out);
+
         }
 
         setGray(out);
@@ -81,10 +89,6 @@ public class GameplayUI {
 
             drawRowOfSquares(out);
             tracker++;
-            if (boardRow < BOARD_SIZE_IN_SQUARES - 1) {
-                // Draw horizontal row separator.
-                setGray(out);
-            }
         }
     }
 
@@ -93,6 +97,8 @@ public class GameplayUI {
         boolean black = false;
         for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS + 1; ++squareRow) {
             if (!(squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2)) {
+                setBlack(out);
+                out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS / 2));
                 for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
                     if (tracker % 2 == 0) {
                         setWhite(out);
@@ -111,7 +117,9 @@ public class GameplayUI {
                     out.print(EMPTY.repeat(LINE_WIDTH_IN_PADDED_CHARS));
                     tracker++;
                 }
+                printEmptyBlack(out);
             } else {
+                printLetterStuff(out);
                 for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
                     if (tracker % 2 == 0) {
                         setWhite(out);
@@ -134,10 +142,28 @@ public class GameplayUI {
                         tracker++;
                     }
                 }
+                printLetterStuffAfter(out);
             }
             setGray(out);
             out.println();
         }
+    }
+
+    private static void printEmptyBlack(PrintStream out) {
+        setBlack(out);
+        out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS / 2));
+    }
+
+    private static void printLetterStuff(PrintStream out) {
+        String[] letters = {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
+        printBlackHeader(out, letters[letterTracker]);
+        letterTracker++;
+    }
+
+    private static void printLetterStuffAfter(PrintStream out) {
+        String[] letters = {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
+        printBlackHeader(out, letters[letterTrackerAfter]);
+        letterTrackerAfter++;
     }
 
     private static void setWhite(PrintStream out) {
@@ -175,6 +201,13 @@ public class GameplayUI {
     private static void printBlackPlayer(PrintStream out, String player) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_WHITE);
+
+        out.print(player);
+    }
+
+    private static void printBlackHeader(PrintStream out, String player) {
+        out.print(SET_BG_COLOR_BLACK);
+        out.print(SET_TEXT_COLOR_GREEN);
 
         out.print(player);
     }
