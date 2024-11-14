@@ -107,6 +107,7 @@ public class UserInteraction {
     public String clear() throws ResponseException {
         assertTrue(loggedIn);
         server.clear();
+        loggedIn = false;
         return String.format("Databases Cleared by %s\n", userData.username());
     }
 
