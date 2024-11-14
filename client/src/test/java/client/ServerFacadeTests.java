@@ -1,5 +1,10 @@
 package client;
 
+import exception.ResponseException;
+import model.AuthData;
+import model.GameData;
+import model.UserData;
+import serverFacade.ServerFacade;
 import org.junit.jupiter.api.*;
 import server.Server;
 
@@ -18,6 +23,16 @@ public class ServerFacadeTests {
     @AfterAll
     static void stopServer() {
         server.stop();
+    }
+
+    @BeforeEach
+    public void setup() {
+        server.run(8080);
+        final ServerFacade fakeServer;
+        GameData gameData;
+        AuthData authData;
+        UserData userData;
+
     }
 
 

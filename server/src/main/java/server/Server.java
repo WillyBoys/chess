@@ -84,8 +84,6 @@ public class Server {
 
             var auth = userServ.login(user);
 
-            System.out.println("Generated auth token: " + auth.authToken());
-
             res.status(200);
             return new Gson().toJson(auth);
         } catch (DataAccessException error) {

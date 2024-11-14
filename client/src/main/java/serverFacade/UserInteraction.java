@@ -1,6 +1,11 @@
+package serverFacade;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
+import model.AuthData;
+import model.GameData;
+import model.JoinGameRequest;
+import model.UserData;
 
 import java.util.Arrays;
 
@@ -11,7 +16,9 @@ public class UserInteraction {
     private final ServerFacade server;
     private final String serverUrl;
     private boolean loggedIn = false;
-    private String clientName = null;
+    private GameData gameData;
+    private AuthData authData;
+    private UserData userData;
 
     public UserInteraction(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -41,29 +48,29 @@ public class UserInteraction {
 
     public String registerUser(String... params) throws ResponseException {
         if (params.length >= 3) {
-            clientName = params[0];
-            server.registerUser();
+            userData = new UserData(params[0], params[1], params[2]);
+            authData = server.registerUser(userData);
             loggedIn = true;
-            return String.format("You have registered as %s.\n", clientName);
+            return String.format("You have registered as %s.\n", userData.username());
         }
         throw new ResponseException(400, "Expected: <Username> <Password> <Email>\n");
     }
 
     public String loginUser(String... params) throws ResponseException {
         if (params.length >= 2) {
-            clientName = params[0];
-            server.loginUser();
+            userData = new UserData(params[0], params[1], null);
+            authData = server.loginUser(userData);
             loggedIn = true;
-            return String.format("You signed in as %s.\n", clientName);
+            return String.format("You signed in as %s.\n", userData.username());
         }
         throw new ResponseException(400, "Expected: <Username> <Password>\n");
     }
 
     public String logoutUser() throws ResponseException {
         assertTrue(loggedIn);
-        server.logoutUser();
+        server.logoutUser(authData);
         loggedIn = false;
-        return String.format("Logged out %s. We hate to see you go.\n", clientName);
+        return String.format("Logged out %s. We hate to see you go.\n", userData.username());
     }
 
     public String listGames() throws ResponseException {
@@ -82,7 +89,7 @@ public class UserInteraction {
         assertTrue(loggedIn);
         if (params.length >= 1) {
             String gameName = params[0];
-            server.createGame();
+            server.createGame(gameName);
         }
         throw new ResponseException(400, "Expected: <GameName>\n");
     }
@@ -90,7 +97,9 @@ public class UserInteraction {
     public String joinGame(String... params) throws ResponseException {
         assertTrue(loggedIn);
         if (params.length >= 2) {
-            server.joinGame();
+            int gameID = Integer.parseInt(params[0]);
+            var join = new JoinGameRequest(gameID, userData.username(), params[1]);
+            server.joinGame(join);
         }
         throw new ResponseException(400, "Expected: <GameID> <WHITE or BLACK>\n");
     }
@@ -98,7 +107,7 @@ public class UserInteraction {
     public String clear() throws ResponseException {
         assertTrue(loggedIn);
         server.clear();
-        return String.format("Databases Cleared by %s\n", clientName);
+        return String.format("Databases Cleared by %s\n", userData.username());
     }
 
     public String help() throws ResponseException {

@@ -1,6 +1,12 @@
+package serverFacade;
+
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
+import model.AuthData;
+import model.GameData;
+import model.JoinGameRequest;
+import model.UserData;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,19 +25,19 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public void registerUser() throws ResponseException {
+    public AuthData registerUser(UserData data) throws ResponseException {
         var path = "/user";
-        this.makeRequest("POST", path, null, null);
+        return this.makeRequest("POST", path, data, AuthData.class);
     }
 
-    public void loginUser() throws ResponseException {
+    public AuthData loginUser(UserData data) throws ResponseException {
         var path = "/session";
-        this.makeRequest("POST", path, null, null);
+        return this.makeRequest("POST", path, data, AuthData.class);
     }
 
-    public void logoutUser() throws ResponseException {
+    public void logoutUser(AuthData auth) throws ResponseException {
         var path = "/session";
-        this.makeRequest("DELETE", path, null, null);
+        this.makeRequest("DELETE", path, auth.authToken(), null);
     }
 
     public Collection<ChessGame> listGames() throws ResponseException {
@@ -40,14 +46,14 @@ public class ServerFacade {
         return gameList;
     }
 
-    public void createGame() throws ResponseException {
+    public GameData createGame(String gameName) throws ResponseException {
         var path = "/game";
-        this.makeRequest("POST", path, null, null);
+        return this.makeRequest("POST", path, gameName, GameData.class);
     }
 
-    public void joinGame() throws ResponseException {
+    public void joinGame(JoinGameRequest join) throws ResponseException {
         var path = "/game";
-        this.makeRequest("PUT", path, null, null);
+        this.makeRequest("PUT", path, join, null);
     }
 
     public void clear() throws ResponseException {
