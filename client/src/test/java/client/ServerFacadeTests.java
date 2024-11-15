@@ -22,10 +22,12 @@ public class ServerFacadeTests {
     private GameDAO gameDAO;
     private static Server server;
 
+    private static int port;
+
     @BeforeAll
     public static void init() {
         server = new Server();
-        var port = server.run(8080);
+        port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
     }
 
@@ -36,7 +38,7 @@ public class ServerFacadeTests {
 
     @BeforeEach
     public void setup() throws ResponseException {
-        var serverUrl = "http://localhost:8080";
+        var serverUrl = "http://localhost:" + port;
         this.serverFacade = new ServerFacade(serverUrl);
         GameData gameData;
         AuthData authData;
