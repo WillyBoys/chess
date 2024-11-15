@@ -35,6 +35,7 @@ public class UserInteraction {
                 case "list" -> listGames();
                 case "create" -> createGame(params);
                 case "join" -> joinGame(params);
+                case "observe" -> observeGame(params);
                 case "clear" -> clear();
                 case "quit" -> "quit";
                 default -> help();
@@ -136,6 +137,8 @@ public class UserInteraction {
     public String joinGame(String... params) throws ResponseException {
         if (authData == null) {
             return "You are not logged in.\n";
+        } else if (params.length < 2) {
+            return "There was not enough information to join the game.\n";
         } else {
             try {
                 if (params.length >= 2) {
@@ -149,6 +152,18 @@ public class UserInteraction {
             GameplayUI.main(params);
             return "Enjoy your game and good luck!\n";
         }
+    }
+
+    public String observeGame(String... params) {
+        if (authData == null) {
+            return "You are not logged in.\n";
+        } else {
+            if (params.length > 0) {
+                GameplayUI.main(params);
+                return "Enjoy the game!";
+            }
+        }
+        return null;
     }
 
     public String clear() throws ResponseException {
@@ -175,6 +190,7 @@ public class UserInteraction {
                 - List all Games: list
                 - Create New Game: create <GameName>
                 - Join a Game: join <GameID> <WHITE or BLACK>
+                - Observe a Game: observe <GameID>
                 - Terminate the Program: quit
                 """;
     }

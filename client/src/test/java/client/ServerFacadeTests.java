@@ -1,22 +1,31 @@
 package client;
 
+import chess.ChessGame;
+import dataaccess.DataAccessException;
+import dataaccess.GameDAO;
+import dataaccess.SqlGameDAO;
 import exception.ResponseException;
-import model.AuthData;
-import model.GameData;
-import model.UserData;
+import model.*;
 import serverFacade.ServerFacade;
 import org.junit.jupiter.api.*;
 import server.Server;
+import serverFacade.UserInteraction;
+
+import java.util.Collection;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
+    public ServerFacade serverFacade;
 
+    private GameDAO gameDAO;
     private static Server server;
 
     @BeforeAll
     public static void init() {
         server = new Server();
-        var port = server.run(0);
+        var port = server.run(8080);
         System.out.println("Started test HTTP server on " + port);
     }
 
@@ -26,12 +35,15 @@ public class ServerFacadeTests {
     }
 
     @BeforeEach
-    public void setup() {
-        server.run(8080);
-        final ServerFacade fakeServer;
+    public void setup() throws ResponseException {
+        var serverUrl = "http://localhost:8080";
+        this.serverFacade = new ServerFacade(serverUrl);
         GameData gameData;
         AuthData authData;
         UserData userData;
+        serverFacade.clear();
+
+        this.gameDAO = new SqlGameDAO();
 
     }
 
@@ -39,6 +51,155 @@ public class ServerFacadeTests {
     @Test
     public void sampleTest() {
         Assertions.assertTrue(true);
+    }
+
+    @Test
+    public void clearAll() throws ResponseException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData testAuth = serverFacade.registerUser(testUser);
+        ChessGame game = new ChessGame();
+
+        GameData testData = new GameData(5, null, null, "testGame", game);
+        serverFacade.createGame(testData, testAuth);
+
+        serverFacade.clear();
+
+        UserData anotherTestUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData anotherTestAuth = serverFacade.registerUser(anotherTestUser);
+        GameList list = serverFacade.listGames(anotherTestAuth);
+        assert (list.toString().equals("GameList[games=[]]"));
+    }
+
+    @Test
+    public void registerUserSuccess() throws ResponseException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData testAuth = serverFacade.registerUser(testUser);
+
+        assertNotNull(testAuth);
+    }
+
+    @Test
+    public void registerUserFail() {
+        UserData testUser = new UserData(null, null, null);
+
+        assertThrows(ResponseException.class, () -> serverFacade.registerUser(testUser));
+    }
+
+    @Test
+    public void loginUserSuccess() throws ResponseException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        serverFacade.registerUser(testUser);
+
+        AuthData testAuth = serverFacade.loginUser(testUser);
+        assertNotNull(testAuth);
+    }
+
+    @Test
+    public void loginUserFail() throws ResponseException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        serverFacade.registerUser(testUser);
+        AuthData failUser = new AuthData(null, "testPassword");
+
+        assertThrows(ResponseException.class, () -> serverFacade.logoutUser(failUser));
+    }
+
+    @Test
+    public void logoutUserSuccess() throws ResponseException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData testAuth = serverFacade.registerUser(testUser);
+
+        serverFacade.logoutUser(testAuth);
+        assertThrows(ResponseException.class, () -> serverFacade.listGames(testAuth));
+    }
+
+    @Test
+    public void logoutUserFail() throws ResponseException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData testAuth = serverFacade.registerUser(testUser);
+
+        AuthData failAuth = new AuthData(null, null);
+
+        assertThrows(ResponseException.class, () -> serverFacade.logoutUser(failAuth));
+    }
+
+    @Test
+    public void listGamesSuccess() throws ResponseException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData testAuth = serverFacade.registerUser(testUser);
+
+        ChessGame game = new ChessGame();
+        GameData testData = new GameData(5, null, null, "testGame", game);
+        serverFacade.createGame(testData, testAuth);
+
+        assertNotNull(serverFacade.listGames(testAuth));
+    }
+
+    @Test
+    public void listGamesFail() throws ResponseException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData testAuth = serverFacade.registerUser(testUser);
+
+        ChessGame game = new ChessGame();
+        GameData testData = new GameData(5, null, null, "testGame", game);
+        serverFacade.createGame(testData, testAuth);
+
+        AuthData failAuth = new AuthData(null, null);
+
+        assertThrows(ResponseException.class, () -> serverFacade.listGames(failAuth));
+    }
+
+    @Test
+    public void createGameSuccess() throws ResponseException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData testAuth = serverFacade.registerUser(testUser);
+
+        ChessGame game = new ChessGame();
+        GameData testData = new GameData(5, null, null, "testGame", game);
+
+        assertNotNull(serverFacade.listGames(testAuth));
+    }
+
+    @Test
+    public void createGameFail() throws ResponseException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData testAuth = serverFacade.registerUser(testUser);
+        ChessGame game = new ChessGame();
+        GameData testData = new GameData(5, null, null, "testGame", game);
+
+        AuthData failAuth = new AuthData(null, null);
+        assertThrows(ResponseException.class, () -> serverFacade.createGame(testData, failAuth));
+    }
+
+    @Test
+    public void joinGameSuccess() throws ResponseException, DataAccessException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData testAuth = serverFacade.registerUser(testUser);
+
+        GameData testData = new GameData(5, null, null, "testGame", null);
+
+        int id = gameDAO.createGame(testData);
+        JoinGameRequest join = new JoinGameRequest(id, testUser.username(), "WHITE");
+
+        serverFacade.joinGame(join, testAuth);
+
+        assertNotNull(serverFacade.listGames(testAuth));
+
+    }
+
+    @Test
+    public void joinGameFail() throws ResponseException, DataAccessException {
+        UserData testUser = new UserData("testUser", "testPassword", "testEmail");
+        AuthData testAuth = serverFacade.registerUser(testUser);
+
+        ChessGame game = new ChessGame();
+        GameData testData = new GameData(0, null, null, "testGame", game);
+
+        int id = gameDAO.createGame(testData);
+
+        JoinGameRequest join = new JoinGameRequest(id, "testUser", "WHITE");
+        serverFacade.joinGame(join, testAuth);
+
+        assertThrows(ResponseException.class, () -> serverFacade.joinGame(join, testAuth));
     }
 
 }
