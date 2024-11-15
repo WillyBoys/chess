@@ -55,7 +55,7 @@ public class UserInteraction {
                     return String.format("You have registered as %s.\n", userData.username());
                 }
             } else {
-                return "You are logged in already. Logout to register a new user\n";
+                return "There was an error. Try again.\n";
             }
         } catch (ResponseException e) {
             throw new ResponseException(400, "Expected: <Username> <Password> <Email>\n");
