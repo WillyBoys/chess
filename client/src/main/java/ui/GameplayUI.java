@@ -158,37 +158,8 @@ public class GameplayUI {
                         int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS - prefixLength;
 
                         out.print(EMPTY.repeat(prefixLength));
-                        if (playerWhite && boardRow < 3) {
-                            if (black) {
-                                printBlackPiecesOnBlack(out, topPieces);
-                            } else {
-                                printBlackPiecesOnWhite(out, topPieces);
-                            }
-                        } else if (playerWhite && boardRow > 6) {
-                            if (black) {
-                                printWhitePiecesOnBlack(out, bottomPieces);
-                            } else {
-                                printWhitePiecesOnWhite(out, bottomPieces);
-                            }
-                        } else if (!playerWhite && boardRow < 3) {
-                            if (black) {
-                                printWhitePiecesOnBlack(out, topPieces);
-                            } else {
-                                printWhitePiecesOnWhite(out, topPieces);
-                            }
-                        } else if (!playerWhite && boardRow > 6) {
-                            if (black) {
-                                printBlackPiecesOnBlack(out, bottomPieces);
-                            } else {
-                                printBlackPiecesOnWhite(out, bottomPieces);
-                            }
-                        } else {
-                            if (black) {
-                                printBlackPlayer(out, EMPTY);
-                            } else {
-                                printPlayer(out, EMPTY);
-                            }
-                        }
+                        helperFunction(out, boardRow, black);
+
                         out.print(EMPTY.repeat(suffixLength));
                         tracker++;
                     }
@@ -201,6 +172,40 @@ public class GameplayUI {
             }
             setGray(out);
             out.println();
+        }
+    }
+
+    private static void helperFunction(PrintStream out, int boardRow, boolean black) {
+        if (playerWhite && boardRow < 3) {
+            if (black) {
+                printBlackPiecesOnBlack(out, topPieces);
+            } else {
+                printBlackPiecesOnWhite(out, topPieces);
+            }
+        } else if (playerWhite && boardRow > 6) {
+            if (black) {
+                printWhitePiecesOnBlack(out, bottomPieces);
+            } else {
+                printWhitePiecesOnWhite(out, bottomPieces);
+            }
+        } else if (!playerWhite && boardRow < 3) {
+            if (black) {
+                printWhitePiecesOnBlack(out, topPieces);
+            } else {
+                printWhitePiecesOnWhite(out, topPieces);
+            }
+        } else if (!playerWhite && boardRow > 6) {
+            if (black) {
+                printBlackPiecesOnBlack(out, bottomPieces);
+            } else {
+                printBlackPiecesOnWhite(out, bottomPieces);
+            }
+        } else {
+            if (black) {
+                printBlackPlayer(out, EMPTY);
+            } else {
+                printPlayer(out, EMPTY);
+            }
         }
     }
 
