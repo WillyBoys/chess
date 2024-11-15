@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.Map;
 
 public class ServerFacade {
 
@@ -87,7 +88,11 @@ public class ServerFacade {
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
-            throw new ResponseException(status, "failure: " + status);
+            try (InputStream respBody = http.getErrorStream()) {
+                InputStreamReader reader = new InputStreamReader(respBody);
+                Map response = new Gson().fromJson(reader, Map.class);
+                throw new ResponseException(status, "failure: " + response.get("message"));
+            }
         }
     }
 

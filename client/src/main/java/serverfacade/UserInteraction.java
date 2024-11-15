@@ -58,7 +58,7 @@ public class UserInteraction {
                 return "There was an error. Try again.\n";
             }
         } catch (ResponseException e) {
-            throw new ResponseException(400, "Expected: <Username> <Password> <Email>\n");
+            throw new ResponseException(400, e.getMessage() + "\n");
         }
         return "There was an error trying to register.\n";
     }
@@ -76,7 +76,7 @@ public class UserInteraction {
                 return "You are already logged in. Logout to login as someone else.\n";
             }
         } catch (ResponseException e) {
-            throw new ResponseException(400, "That didn't work. Expected: <Username> <Password>\n");
+            throw new ResponseException(400, e.getMessage() + "\n");
         }
         return "It is possible that you didn't log in correctly.\n";
     }
@@ -91,7 +91,7 @@ public class UserInteraction {
                 return String.format("Logged out %s. We hate to see you go.\n", userData.username());
             }
         } catch (ResponseException e) {
-            return "There was an error logging you out.\n";
+            throw new ResponseException(400, e.getMessage() + "\n");
         }
     }
 
@@ -107,7 +107,7 @@ public class UserInteraction {
                 gameCount++;
                 result.append(gameCount);
                 result.append(". ");
-                result.append(gson.toJson(game.gameID())).append('|');
+                //result.append(gson.toJson(game.gameID())).append('|');
                 result.append(gson.toJson(game.gameName())).append('|');
                 result.append(gson.toJson(game.whiteUsername())).append('|');
                 result.append(gson.toJson(game.blackUsername())).append('\n');
@@ -128,7 +128,7 @@ public class UserInteraction {
                     server.createGame(gameName, authData);
                 }
             } catch (ResponseException e) {
-                throw new ResponseException(400, "Expected: <GameName>\n");
+                throw new ResponseException(400, e.getMessage() + "\n");
             }
             return ("The game was created. You can now join it.\n");
         }
@@ -147,7 +147,7 @@ public class UserInteraction {
                     server.joinGame(join, authData);
                 }
             } catch (ResponseException e) {
-                throw new ResponseException(400, "There was an error. Expected: <GameID> <WHITE or BLACK>\n");
+                throw new ResponseException(400, e.getMessage() + "\n");
             }
             GameplayUI.main(params);
             return "Enjoy your game and good luck!\n";
