@@ -2,10 +2,8 @@ package serverFacade;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
-import model.AuthData;
-import model.GameData;
-import model.JoinGameRequest;
-import model.UserData;
+import model.*;
+import ui.GameplayUI;
 
 import java.util.Arrays;
 
@@ -47,69 +45,120 @@ public class UserInteraction {
     }
 
     public String registerUser(String... params) throws ResponseException {
-        if (params.length >= 3) {
-            userData = new UserData(params[0], params[1], params[2]);
-            authData = server.registerUser(userData);
-            loggedIn = true;
-            return String.format("You have registered as %s.\n", userData.username());
+        try {
+            if (authData == null) {
+                if (params.length >= 3) {
+                    userData = new UserData(params[0], params[1], params[2]);
+                    authData = server.registerUser(userData);
+                    loggedIn = true;
+                    return String.format("You have registered as %s.\n", userData.username());
+                }
+            } else {
+                return "You are logged in already. Logout to register a new user\n";
+            }
+        } catch (ResponseException e) {
+            throw new ResponseException(400, "Expected: <Username> <Password> <Email>\n");
         }
-        throw new ResponseException(400, "Expected: <Username> <Password> <Email>\n");
+        return "There was an error trying to register.\n";
     }
 
     public String loginUser(String... params) throws ResponseException {
-        if (params.length >= 2) {
-            userData = new UserData(params[0], params[1], null);
-            authData = server.loginUser(userData);
-            loggedIn = true;
-            return String.format("You signed in as %s.\n", userData.username());
+        try {
+            if (authData == null) {
+                if (params.length >= 2) {
+                    userData = new UserData(params[0], params[1], null);
+                    authData = server.loginUser(userData);
+                    loggedIn = true;
+                    return String.format("You signed in as %s.\n", userData.username());
+                }
+            } else {
+                return "You are already logged in. Logout to login as someone else.\n";
+            }
+        } catch (ResponseException e) {
+            throw new ResponseException(400, "That didn't work. Expected: <Username> <Password>\n");
         }
-        throw new ResponseException(400, "Expected: <Username> <Password>\n");
+        return "It is possible that you didn't log in correctly.\n";
     }
 
     public String logoutUser() throws ResponseException {
-        assertTrue(loggedIn);
-        server.logoutUser(authData);
-        loggedIn = false;
-        return String.format("Logged out %s. We hate to see you go.\n", userData.username());
+        try {
+            if (authData == null) {
+                return "You are not logged in.\n";
+            } else {
+                server.logoutUser(authData);
+                loggedIn = false;
+                return String.format("Logged out %s. We hate to see you go.\n", userData.username());
+            }
+        } catch (ResponseException e) {
+            return "There was an error logging you out.\n";
+        }
     }
 
     public String listGames() throws ResponseException {
-        assertTrue(loggedIn);
-        var games = server.listGames(authData);
-        var result = new StringBuilder();
-        var gson = new Gson();
-        for (var game : games) {
-            result.append(gson.toJson(game)).append('\n');
+        if (authData == null) {
+            return "You are not logged in.\n";
+        } else {
+            int gameCount = 0;
+            GameList games = server.listGames(authData);
+            var result = new StringBuilder();
+            var gson = new Gson();
+            for (var game : games.games()) {
+                gameCount++;
+                result.append(gameCount);
+                result.append(". ");
+                result.append(gson.toJson(game.gameID())).append('|');
+                result.append(gson.toJson(game.gameName())).append('|');
+                result.append(gson.toJson(game.whiteUsername())).append('|');
+                result.append(gson.toJson(game.blackUsername())).append('\n');
+            }
+            return result.toString();
         }
-        return result.toString();
 
     }
 
     public String createGame(String... params) throws ResponseException {
-        assertTrue(loggedIn);
-        if (params.length >= 1) {
-            String name = params[0];
-            GameData gameName = new GameData(0, null, null, name, null);
-            server.createGame(gameName, authData);
+        if (authData == null) {
+            return "You are not logged in.\n";
+        } else {
+            try {
+                if (params.length >= 1) {
+                    String name = params[0];
+                    GameData gameName = new GameData(0, null, null, name, null);
+                    server.createGame(gameName, authData);
+                }
+            } catch (ResponseException e) {
+                throw new ResponseException(400, "Expected: <GameName>\n");
+            }
+            return ("The game was created. You can now join it.\n");
         }
-        throw new ResponseException(400, "Expected: <GameName>\n");
     }
 
     public String joinGame(String... params) throws ResponseException {
-        assertTrue(loggedIn);
-        if (params.length >= 2) {
-            int gameID = Integer.parseInt(params[0]);
-            var join = new JoinGameRequest(gameID, userData.username(), params[1]);
-            server.joinGame(join, authData);
+        if (authData == null) {
+            return "You are not logged in.\n";
+        } else {
+            try {
+                if (params.length >= 2) {
+                    int gameID = Integer.parseInt(params[0]);
+                    var join = new JoinGameRequest(gameID, userData.username(), params[1]);
+                    server.joinGame(join, authData);
+                }
+            } catch (ResponseException e) {
+                throw new ResponseException(400, "There was an error. Expected: <GameID> <WHITE or BLACK>\n");
+            }
+            GameplayUI.main(params);
+            return "Enjoy your game and good luck!\n";
         }
-        throw new ResponseException(400, "Expected: <GameID> <WHITE or BLACK>\n");
     }
 
     public String clear() throws ResponseException {
-        assertTrue(loggedIn);
-        server.clear();
-        loggedIn = false;
-        return String.format("Databases Cleared by %s\n", userData.username());
+        if (authData == null) {
+            return "You are not logged in.\n";
+        } else {
+            server.clear();
+            loggedIn = false;
+            return String.format("Databases Cleared by %s\n", userData.username());
+        }
     }
 
     public String help() throws ResponseException {

@@ -15,7 +15,7 @@ import java.util.Collection;
 public class GameService {
     GameDAO gameDAO;
     AuthDAO authDAO;
-    int id = 0;
+    int id;
 
     public GameService(GameDAO gameDAO, AuthDAO authDAO) {
         this.gameDAO = gameDAO;
@@ -31,7 +31,10 @@ public class GameService {
     }
 
     public int createGame(String gameName, AuthData auth) throws DataAccessException {
-        id++;
+        var tempList = gameDAO.listGame();
+        for (int i = 0; i <= tempList.size(); i++) {
+            id++;
+        }
 
         if (gameName == null) {
             throw new DataAccessException("Error: bad request");
@@ -60,7 +63,7 @@ public class GameService {
             throw new DataAccessException("Error: bad request");
         }
 
-        if (info.playerColor().equals("BLACK")) {
+        if (info.playerColor().equals("BLACK") || info.playerColor().equals("black")) {
             if (data.blackUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }

@@ -2,10 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
-import model.AuthData;
-import model.GameData;
-import model.JoinGameRequest;
-import model.UserData;
+import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 import service.AuthService;
 import service.GameService;
@@ -14,6 +11,8 @@ import spark.*;
 import dataaccess.DatabaseManager;
 
 import javax.xml.crypto.Data;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 public class Server {
@@ -142,9 +141,9 @@ public class Server {
                 return new Gson().toJson(Map.of("message", "Error: unauthorized"));
             }
 
-            var list = gameServ.listGames(auth).toArray();
+            Collection<GameData> list = gameServ.listGames(auth);
             res.status(200);
-            return new Gson().toJson(Map.of("games", list));
+            return new Gson().toJson(new GameList(list));
         } catch (DataAccessException error) {
             res.status(500);
             return new Gson().toJson(Map.of("message", "Error: " + error.getMessage()));

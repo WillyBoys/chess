@@ -3,18 +3,17 @@ package serverFacade;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
-import model.AuthData;
-import model.GameData;
-import model.JoinGameRequest;
-import model.UserData;
+import model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class ServerFacade {
@@ -40,10 +39,9 @@ public class ServerFacade {
         this.makeRequest("DELETE", path, null, null, auth.authToken());
     }
 
-    public Collection<ChessGame> listGames(AuthData auth) throws ResponseException {
+    public GameList listGames(AuthData auth) throws ResponseException {
         var path = "/game";
-        Collection<ChessGame> gameList = this.makeRequest("GET", path, null, null, auth.authToken());
-        return gameList;
+        return this.makeRequest("GET", path, null, GameList.class, auth.authToken());
     }
 
     public GameData createGame(GameData gameName, AuthData auth) throws ResponseException {
