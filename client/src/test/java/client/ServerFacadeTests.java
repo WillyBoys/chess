@@ -6,12 +6,9 @@ import dataaccess.GameDAO;
 import dataaccess.SqlGameDAO;
 import exception.ResponseException;
 import model.*;
-import serverFacade.ServerFacade;
+import serverfacade.ServerFacade;
 import org.junit.jupiter.api.*;
 import server.Server;
-import serverFacade.UserInteraction;
-
-import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
