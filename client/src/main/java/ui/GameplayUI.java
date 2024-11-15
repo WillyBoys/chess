@@ -12,11 +12,13 @@ public class GameplayUI {
     private static final int BOARD_SIZE_IN_SQUARES = 8;
     private static final int SQUARE_SIZE_IN_PADDED_CHARS = 2;
     private static final int LINE_WIDTH_IN_PADDED_CHARS = 1;
-    private static final int SQUARE_SIZE = 2;
     private static int tracker = 0;
     public static boolean playerWhite = true;
     private static int letterTracker = 0;
     private static int letterTrackerAfter = 0;
+    private static int printPieces = 0;
+    static String[] topPieces = {" R ", " N ", " B ", " K ", " Q ", " B ", " N ", " R ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " P "};
+    static String[] bottomPieces = {" P ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " R ", " N ", " B ", " K ", " Q ", " B ", " N ", " R "};
 
 
     // Padded characters.
@@ -28,6 +30,24 @@ public class GameplayUI {
 
         out.print(ERASE_SCREEN);
 
+        //White Board
+        out.println("Here is White Board");
+        printEmptyBlack(out);
+        drawHeaders(out);
+
+        drawChessBoard(out);
+
+        printEmptyBlack(out);
+        drawHeaders(out);
+
+        out.println();
+
+        //Black Board
+        out.println("Here is Black Board");
+        playerWhite = false;
+        tracker = 0;
+        letterTracker = 0;
+        letterTrackerAfter = 0;
         printEmptyBlack(out);
         drawHeaders(out);
 
@@ -76,7 +96,7 @@ public class GameplayUI {
     private static void printHeaderText(PrintStream out, String player) {
         //Edit the look of the header
         out.print(SET_BG_COLOR_BLACK);
-        out.print(SET_TEXT_COLOR_GREEN);
+        out.print(SET_TEXT_COLOR_LIGHT_GREY);
 
         out.print(player);
 
@@ -85,20 +105,21 @@ public class GameplayUI {
 
     private static void drawChessBoard(PrintStream out) {
 
-        for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
+        for (int boardRow = 1; boardRow <= BOARD_SIZE_IN_SQUARES; ++boardRow) {
 
-            drawRowOfSquares(out);
+            drawRowOfSquares(out, boardRow);
             tracker++;
         }
     }
 
 
-    private static void drawRowOfSquares(PrintStream out) {
+    private static void drawRowOfSquares(PrintStream out, int boardRow) {
         boolean black = false;
         for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS + 1; ++squareRow) {
             if (!(squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2)) {
-                setBlack(out);
-                out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS / 2));
+                printEmptyBlack(out);
+
+                //THIS IS WHERE WE START PRINTING ALL THE SQUARES
                 for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
                     if (tracker % 2 == 0) {
                         setWhite(out);
@@ -107,19 +128,23 @@ public class GameplayUI {
                         setLightGray(out);
                         black = true;
                     }
+
                     out.print(EMPTY.repeat(LINE_WIDTH_IN_PADDED_CHARS));
                     if (black) {
                         printBlackPlayer(out, EMPTY);
                     } else {
                         printPlayer(out, EMPTY);
                     }
-
                     out.print(EMPTY.repeat(LINE_WIDTH_IN_PADDED_CHARS));
                     tracker++;
                 }
                 printEmptyBlack(out);
             } else {
-                printLetterStuff(out);
+                if (playerWhite) {
+                    printLetterStuff(out);
+                } else {
+                    printBlackLetterStuff(out);
+                }
                 for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
                     if (tracker % 2 == 0) {
                         setWhite(out);
@@ -133,16 +158,46 @@ public class GameplayUI {
                         int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS - prefixLength;
 
                         out.print(EMPTY.repeat(prefixLength));
-                        if (black) {
-                            printBlackPlayer(out, EMPTY);
+                        if (playerWhite && boardRow < 3) {
+                            if (black) {
+                                printBlackPiecesOnBlack(out, topPieces);
+                            } else {
+                                printBlackPiecesOnWhite(out, topPieces);
+                            }
+                        } else if (playerWhite && boardRow > 6) {
+                            if (black) {
+                                printWhitePiecesOnBlack(out, bottomPieces);
+                            } else {
+                                printWhitePiecesOnWhite(out, bottomPieces);
+                            }
+                        } else if (!playerWhite && boardRow < 3) {
+                            if (black) {
+                                printWhitePiecesOnBlack(out, topPieces);
+                            } else {
+                                printWhitePiecesOnWhite(out, topPieces);
+                            }
+                        } else if (!playerWhite && boardRow > 6) {
+                            if (black) {
+                                printBlackPiecesOnBlack(out, bottomPieces);
+                            } else {
+                                printBlackPiecesOnWhite(out, bottomPieces);
+                            }
                         } else {
-                            printPlayer(out, EMPTY);
+                            if (black) {
+                                printBlackPlayer(out, EMPTY);
+                            } else {
+                                printPlayer(out, EMPTY);
+                            }
                         }
                         out.print(EMPTY.repeat(suffixLength));
                         tracker++;
                     }
                 }
-                printLetterStuffAfter(out);
+                if (playerWhite) {
+                    printLetterStuffAfter(out);
+                } else {
+                    printBlackLetterStuffAfter(out);
+                }
             }
             setGray(out);
             out.println();
@@ -160,8 +215,20 @@ public class GameplayUI {
         letterTracker++;
     }
 
+    private static void printBlackLetterStuff(PrintStream out) {
+        String[] letters = {" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
+        printBlackHeader(out, letters[letterTracker]);
+        letterTracker++;
+    }
+
     private static void printLetterStuffAfter(PrintStream out) {
         String[] letters = {" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
+        printBlackHeader(out, letters[letterTrackerAfter]);
+        letterTrackerAfter++;
+    }
+
+    private static void printBlackLetterStuffAfter(PrintStream out) {
+        String[] letters = {" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
         printBlackHeader(out, letters[letterTrackerAfter]);
         letterTrackerAfter++;
     }
@@ -191,6 +258,46 @@ public class GameplayUI {
         out.print(SET_TEXT_COLOR_BLACK);
     }
 
+    private static void printBlackPiecesOnBlack(PrintStream out, String[] topPieces) {
+        out.print(RESET_TEXT_BOLD_FAINT);
+        out.print(SET_TEXT_ITALIC);
+        printBlackPlayer(out, topPieces[printPieces]);
+        printPieces++;
+        if (printPieces == 16) {
+            printPieces = 0;
+        }
+    }
+
+    private static void printBlackPiecesOnWhite(PrintStream out, String[] topPieces) {
+        out.print(RESET_TEXT_BOLD_FAINT);
+        out.print(SET_TEXT_ITALIC);
+        printPlayer(out, topPieces[printPieces]);
+        printPieces++;
+        if (printPieces == 16) {
+            printPieces = 0;
+        }
+    }
+
+    private static void printWhitePiecesOnWhite(PrintStream out, String[] bottomPieces) {
+        out.print(RESET_TEXT_ITALIC);
+        out.print(SET_TEXT_BOLD);
+        printPlayer(out, bottomPieces[printPieces]);
+        printPieces++;
+        if (printPieces == 16) {
+            printPieces = 0;
+        }
+    }
+
+    private static void printWhitePiecesOnBlack(PrintStream out, String[] bottomPieces) {
+        out.print(RESET_TEXT_ITALIC);
+        out.print(SET_TEXT_BOLD);
+        printBlackPlayer(out, bottomPieces[printPieces]);
+        printPieces++;
+        if (printPieces == 16) {
+            printPieces = 0;
+        }
+    }
+
     private static void printPlayer(PrintStream out, String player) {
         out.print(SET_BG_COLOR_WHITE);
         out.print(SET_TEXT_COLOR_BLACK);
@@ -207,7 +314,7 @@ public class GameplayUI {
 
     private static void printBlackHeader(PrintStream out, String player) {
         out.print(SET_BG_COLOR_BLACK);
-        out.print(SET_TEXT_COLOR_GREEN);
+        out.print(SET_TEXT_COLOR_LIGHT_GREY);
 
         out.print(player);
     }

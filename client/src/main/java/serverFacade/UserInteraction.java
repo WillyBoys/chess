@@ -75,7 +75,7 @@ public class UserInteraction {
 
     public String listGames() throws ResponseException {
         assertTrue(loggedIn);
-        var games = server.listGames();
+        var games = server.listGames(authData);
         var result = new StringBuilder();
         var gson = new Gson();
         for (var game : games) {
@@ -88,8 +88,9 @@ public class UserInteraction {
     public String createGame(String... params) throws ResponseException {
         assertTrue(loggedIn);
         if (params.length >= 1) {
-            String gameName = params[0];
-            server.createGame(gameName);
+            String name = params[0];
+            GameData gameName = new GameData(0, null, null, name, null);
+            server.createGame(gameName, authData);
         }
         throw new ResponseException(400, "Expected: <GameName>\n");
     }
@@ -99,7 +100,7 @@ public class UserInteraction {
         if (params.length >= 2) {
             int gameID = Integer.parseInt(params[0]);
             var join = new JoinGameRequest(gameID, userData.username(), params[1]);
-            server.joinGame(join);
+            server.joinGame(join, authData);
         }
         throw new ResponseException(400, "Expected: <GameID> <WHITE or BLACK>\n");
     }
