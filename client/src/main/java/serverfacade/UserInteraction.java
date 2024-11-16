@@ -5,6 +5,7 @@ import exception.ResponseException;
 import model.*;
 import ui.GameplayUI;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,6 +18,7 @@ public class UserInteraction {
     private GameData gameData;
     private AuthData authData;
     private UserData userData;
+    ArrayList ids = new ArrayList();
 
     public UserInteraction(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -65,7 +67,7 @@ public class UserInteraction {
 
     public String loginUser(String... params) throws ResponseException {
         try {
-            if (authData == null) {
+            if (authData == null || loggedIn == false) {
                 if (params.length >= 2) {
                     userData = new UserData(params[0], params[1], null);
                     authData = server.loginUser(userData);
@@ -73,7 +75,7 @@ public class UserInteraction {
                     return String.format("You signed in as %s.\n", userData.username());
                 }
             } else {
-                return "You are already logged in. Logout to login as someone else.\n";
+                return "Error: Try again.\n";
             }
         } catch (ResponseException e) {
             throw new ResponseException(400, e.getMessage() + "\n");
@@ -100,6 +102,7 @@ public class UserInteraction {
             return "You are not logged in.\n";
         } else {
             int gameCount = 0;
+
             GameList games = server.listGames(authData);
             var result = new StringBuilder();
             var gson = new Gson();
@@ -107,8 +110,8 @@ public class UserInteraction {
                 gameCount++;
                 result.append(gameCount);
                 result.append(". ");
-                //result.append(gson.toJson(game.gameID())).append('|');
                 result.append(gson.toJson(game.gameName())).append('|');
+                ids.add(game.gameID());
                 result.append(gson.toJson(game.whiteUsername())).append('|');
                 result.append(gson.toJson(game.blackUsername())).append('\n');
             }
@@ -143,7 +146,9 @@ public class UserInteraction {
             try {
                 if (params.length >= 2) {
                     int gameID = Integer.parseInt(params[0]);
-                    var join = new JoinGameRequest(gameID, userData.username(), params[1]);
+                    int pull = gameID - 1;
+                    int actual = (int) ids.get(pull);
+                    var join = new JoinGameRequest(actual, userData.username(), params[1]);
                     server.joinGame(join, authData);
                 }
             } catch (ResponseException e) {
@@ -154,16 +159,15 @@ public class UserInteraction {
         }
     }
 
-    public String observeGame(String... params) {
+    public String observeGame(String... params) throws ResponseException {
         if (authData == null) {
             return "You are not logged in.\n";
         } else {
-            if (params.length > 0) {
+            if (params.length >= 1) {
                 GameplayUI.main(params);
-                return "Enjoy the game!";
             }
+            return ("Enjoy the Game.\n");
         }
-        return null;
     }
 
     public String clear() throws ResponseException {
@@ -190,7 +194,7 @@ public class UserInteraction {
                 - List all Games: list
                 - Create New Game: create <GameName>
                 - Join a Game: join <GameID> <WHITE or BLACK>
-                - Observe a Game: observe <GameID>
+                - Observe a Game: observe <GameID> 'observer'
                 - Terminate the Program: quit
                 """;
     }

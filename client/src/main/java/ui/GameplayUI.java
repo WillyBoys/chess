@@ -31,31 +31,32 @@ public class GameplayUI {
         out.print(ERASE_SCREEN);
 
         //White Board
-        out.println("Here is White Board");
-        printEmptyBlack(out);
-        drawHeaders(out);
+        if (args[1].equals("WHITE") || args[1].equals("white") || args[1].equals("OBSERVE") || args[1].equals("observe")) {
+            out.println("Here is White Board");
+            printEmptyBlack(out);
+            drawHeaders(out);
 
-        drawChessBoard(out);
+            drawChessBoard(out);
 
-        printEmptyBlack(out);
-        drawHeaders(out);
+            printEmptyBlack(out);
+            drawHeaders(out);
 
-        out.println();
+            out.println();
+        } else {
+            //Black Board
+            out.println("Here is Black Board");
+            playerWhite = false;
+            tracker = 0;
+            letterTracker = 0;
+            letterTrackerAfter = 0;
+            printEmptyBlack(out);
+            drawHeaders(out);
 
-        //Black Board
-        out.println("Here is Black Board");
-        playerWhite = false;
-        tracker = 0;
-        letterTracker = 0;
-        letterTrackerAfter = 0;
-        printEmptyBlack(out);
-        drawHeaders(out);
+            drawChessBoard(out);
 
-        drawChessBoard(out);
-
-        printEmptyBlack(out);
-        drawHeaders(out);
-
+            printEmptyBlack(out);
+            drawHeaders(out);
+        }
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
     }
