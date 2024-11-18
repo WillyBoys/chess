@@ -154,14 +154,20 @@ public class UserInteraction {
             } catch (ResponseException e) {
                 throw new ResponseException(400, e.getMessage() + "\n");
             }
+
             GameplayUI.main(params);
             return "Enjoy your game and good luck!\n";
         }
     }
 
     public String observeGame(String... params) throws ResponseException {
+        int gameID = Integer.parseInt(params[0]);
         if (authData == null) {
             return "You are not logged in.\n";
+        } else if (ids.size() < gameID) {
+            return "That is not a valid ID\n";
+        } else if (gameID < 1) {
+            return "That is not a valid ID\n";
         } else {
             if (params.length >= 1) {
                 GameplayUI.main(params);

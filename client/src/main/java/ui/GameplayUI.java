@@ -2,7 +2,6 @@ package ui;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Random;
 
 import static ui.EscapeSequences.*;
 
@@ -17,8 +16,10 @@ public class GameplayUI {
     private static int letterTracker = 0;
     private static int letterTrackerAfter = 0;
     private static int printPieces = 0;
-    static String[] topPieces = {" R ", " N ", " B ", " K ", " Q ", " B ", " N ", " R ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " P "};
-    static String[] bottomPieces = {" P ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " R ", " N ", " B ", " K ", " Q ", " B ", " N ", " R "};
+    static String[] whiteTopPieces = {" R ", " N ", " B ", " K ", " Q ", " B ", " N ", " R ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " P "};
+    static String[] whiteBottomPieces = {" P ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " R ", " N ", " B ", " Q ", " K ", " B ", " N ", " R "};
+    static String[] blackTopPieces = {" R ", " N ", " B ", " Q ", " K ", " B ", " N ", " R ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " P "};
+    static String[] blackBottomPieces = {" P ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " R ", " N ", " B ", " K ", " Q ", " B ", " N ", " R "};
 
 
     // Padded characters.
@@ -179,27 +180,27 @@ public class GameplayUI {
     private static void helperFunction(PrintStream out, int boardRow, boolean black) {
         if (playerWhite && boardRow < 3) {
             if (black) {
-                printBlackPiecesOnBlack(out, topPieces);
+                printBlackPiecesOnBlack(out, blackTopPieces);
             } else {
-                printBlackPiecesOnWhite(out, topPieces);
+                printBlackPiecesOnWhite(out, blackTopPieces);
             }
         } else if (playerWhite && boardRow > 6) {
             if (black) {
-                printWhitePiecesOnBlack(out, bottomPieces);
+                printWhitePiecesOnBlack(out, whiteBottomPieces);
             } else {
-                printWhitePiecesOnWhite(out, bottomPieces);
+                printWhitePiecesOnWhite(out, whiteBottomPieces);
             }
         } else if (!playerWhite && boardRow < 3) {
             if (black) {
-                printWhitePiecesOnBlack(out, topPieces);
+                printWhitePiecesOnBlack(out, whiteTopPieces);
             } else {
-                printWhitePiecesOnWhite(out, topPieces);
+                printWhitePiecesOnWhite(out, whiteTopPieces);
             }
         } else if (!playerWhite && boardRow > 6) {
             if (black) {
-                printBlackPiecesOnBlack(out, bottomPieces);
+                printBlackPiecesOnBlack(out, blackBottomPieces);
             } else {
-                printBlackPiecesOnWhite(out, bottomPieces);
+                printBlackPiecesOnWhite(out, blackBottomPieces);
             }
         } else {
             if (black) {
