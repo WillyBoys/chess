@@ -193,6 +193,7 @@ public class UserInteraction {
                     - Register New User: register <Username> <Password> <email>
                     - Log Into Previous Account: login <Username> <Password>
                     - Terminate the Program: quit
+                    - If you need commands: help
                     """;
         }
         return """
