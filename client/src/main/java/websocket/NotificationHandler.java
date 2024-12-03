@@ -1,6 +1,6 @@
 package websocket;
 
 
-public interface SocketHandler {
+public interface NotificationHandler {
     void notify(Notification notification);
 }
