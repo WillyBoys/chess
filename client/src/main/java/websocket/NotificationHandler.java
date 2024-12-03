@@ -1,6 +1,8 @@
 package websocket;
 
 
+import websocket.commands.UserGameCommand;
+
 public interface NotificationHandler {
-    void notify(Notification notification);
+    void notify(UserGameCommand userGameCommand);
 }
