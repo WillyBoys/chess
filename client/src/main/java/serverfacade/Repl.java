@@ -1,8 +1,14 @@
 package serverfacade;
 
+import websocket.SocketHandler;
+import ui.EscapeSequences.*;
+
+import javax.management.Notification;
 import java.util.Scanner;
 
-public class Repl {
+import static ui.EscapeSequences.SET_TEXT_COLOR_RED;
+
+public class Repl extends SocketHandler {
 
     private final UserInteraction interaction;
 
@@ -25,4 +31,9 @@ public class Repl {
             }
         }
     }
+
+    public void notify(Notification notification) {
+        System.out.println(SET_TEXT_COLOR_RED + notificaiton.message());
+    }
+
 }
