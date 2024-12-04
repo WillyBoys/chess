@@ -4,7 +4,11 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
 import ui.GameplayUI;
+import websocket.NotificationHandler;
+import websocket.WebSocketFacade;
+import websocket.commands.UserGameCommand;
 
+import javax.management.Notification;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -19,10 +23,13 @@ public class UserInteraction {
     private AuthData authData;
     private UserData userData;
     ArrayList ids = new ArrayList();
+    private WebSocketFacade ws;
+    private final NotificationHandler notificationHandler;
 
-    public UserInteraction(String serverUrl) {
+    public UserInteraction(String serverUrl, NotificationHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
+        this.notificationHandler = notificationHandler;
     }
 
     public String eval(String input) {
@@ -149,6 +156,8 @@ public class UserInteraction {
                     int pull = gameID - 1;
                     int actual = (int) ids.get(pull);
                     var join = new JoinGameRequest(actual, userData.username(), params[1]);
+                    ws = new WebSocketFacade(serverUrl, notificationHandler);
+                    ws.enterGame(authData, join);
                     server.joinGame(join, authData);
                 }
             } catch (ResponseException e) {
@@ -170,6 +179,11 @@ public class UserInteraction {
             return "That is not a valid ID\n";
         } else {
             if (params.length >= 1) {
+                int pull = gameID - 1;
+                int actual = (int) ids.get(pull);
+                var join = new JoinGameRequest(actual, userData.username(), params[1]);
+                ws = new WebSocketFacade(serverUrl, notificationHandler);
+                ws.enterGame(authData, join);
                 GameplayUI.main(params);
             }
             return ("Enjoy the Game.\n");

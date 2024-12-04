@@ -1,18 +1,19 @@
 package serverfacade;
 
 import websocket.NotificationHandler;
+import websocket.commands.UserGameCommand;
 
 import javax.management.Notification;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.SET_TEXT_COLOR_RED;
 
-public class Repl extends NotificationHandler {
+public class Repl implements NotificationHandler {
 
     private final UserInteraction interaction;
 
     public Repl(String serverUrl) {
-        interaction = new UserInteraction(serverUrl);
+        interaction = new UserInteraction(serverUrl, this);
     }
 
     public void run() {
@@ -31,8 +32,8 @@ public class Repl extends NotificationHandler {
         }
     }
 
-    public void notify(Notification notification) {
-        System.out.println(SET_TEXT_COLOR_RED + notificaiton.message());
+    public void notify(UserGameCommand notification) {
+        System.out.println(SET_TEXT_COLOR_RED + notification);
     }
 
 }

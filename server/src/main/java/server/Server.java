@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.*;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
+import server.websocket.WebSocketHandler;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -22,8 +23,10 @@ public class Server {
     AuthService authServ = new AuthService(authDAO);
     UserService userServ = new UserService(userDAO, authDAO);
     GameService gameServ = new GameService(gameDAO, authDAO);
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
+        webSocketHandler = new WebSocketHandler();
         try {
             DatabaseManager.configureDatabase();
         } catch (DataAccessException e) {
@@ -36,6 +39,8 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/ws", webSocketHandler);
 
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::registerUser);
@@ -188,7 +193,7 @@ public class Server {
             AuthData auther = new AuthData(auths, null);
             String username = authServ.getUsername(auther);
             AuthData auth = new AuthData(auths, username);
-
+            
             gameServ.joinGame(info, auth);
 
             res.status(200);
