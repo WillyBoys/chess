@@ -26,7 +26,7 @@ public class Server {
     private final WebSocketHandler webSocketHandler;
 
     public Server() {
-        webSocketHandler = new WebSocketHandler();
+        webSocketHandler = new WebSocketHandler(authDAO);
         try {
             DatabaseManager.configureDatabase();
         } catch (DataAccessException e) {
@@ -193,7 +193,7 @@ public class Server {
             AuthData auther = new AuthData(auths, null);
             String username = authServ.getUsername(auther);
             AuthData auth = new AuthData(auths, username);
-            
+
             gameServ.joinGame(info, auth);
 
             res.status(200);

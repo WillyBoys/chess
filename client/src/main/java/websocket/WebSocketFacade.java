@@ -6,6 +6,7 @@ import model.AuthData;
 import model.GameData;
 import model.JoinGameRequest;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -31,7 +32,10 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    UserGameCommand notification = new Gson().fromJson(message, UserGameCommand.class);
+                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
+                    notification.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION
+                        //Depending on the type, do what the type is
+                        //Re jsonify it and send it to
                     notificationHandler.notify(notification);
                 }
             });

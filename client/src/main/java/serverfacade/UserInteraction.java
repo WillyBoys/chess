@@ -6,13 +6,9 @@ import model.*;
 import ui.GameplayUI;
 import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
-import websocket.commands.UserGameCommand;
 
-import javax.management.Notification;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // THIS IS THE MAIN INTERACTIONS BETWEEN THE PROGRAM AND CLIENT
 public class UserInteraction {

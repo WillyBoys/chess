@@ -16,6 +16,10 @@ import java.io.IOException;
 public class WebSocketHandler {
     SqlAuthDAO authDAO;
 
+    public WebSocketHandler(SqlAuthDAO authDAO) {
+        this.authDAO = authDAO;
+    }
+
     private final ConnectionManager connections = new ConnectionManager();
 
     @OnWebSocketMessage
@@ -32,9 +36,12 @@ public class WebSocketHandler {
     private void connectGame(String authToken, Session session) throws IOException, DataAccessException {
         AuthData auth = new AuthData(authToken, null);
         String username = authDAO.getUsername(auth);
-        connections.add(auth.username(), session);
-        var message = String.format("%s has joined the game", auth.username());
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message);
+        connections.add(username, session);
+        var message = String.format("%s has joined the game", username);
+        var notification = new NotificationMessage(message);
+
+        //var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        //Also send the Load Game to the root client
         connections.broadcast(username, notification);
     }
 
