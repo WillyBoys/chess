@@ -58,7 +58,7 @@ public class ServerFacadeTests {
         AuthData testAuth = serverFacade.registerUser(testUser);
         ChessGame game = new ChessGame();
 
-        GameData testData = new GameData(5, null, null, "testGame", game);
+        GameData testData = new GameData(5, null, null, "testGame", game, false);
         serverFacade.createGame(testData, testAuth);
 
         serverFacade.clear();
@@ -127,7 +127,7 @@ public class ServerFacadeTests {
         AuthData testAuth = serverFacade.registerUser(testUser);
 
         ChessGame game = new ChessGame();
-        GameData testData = new GameData(5, null, null, "testGame", game);
+        GameData testData = new GameData(5, null, null, "testGame", game, false);
         serverFacade.createGame(testData, testAuth);
 
         assertNotNull(serverFacade.listGames(testAuth));
@@ -139,7 +139,7 @@ public class ServerFacadeTests {
         AuthData testAuth = serverFacade.registerUser(testUser);
 
         ChessGame game = new ChessGame();
-        GameData testData = new GameData(5, null, null, "testGame", game);
+        GameData testData = new GameData(5, null, null, "testGame", game, false);
         serverFacade.createGame(testData, testAuth);
 
         AuthData failAuth = new AuthData(null, null);
@@ -153,7 +153,7 @@ public class ServerFacadeTests {
         AuthData testAuth = serverFacade.registerUser(testUser);
 
         ChessGame game = new ChessGame();
-        GameData testData = new GameData(5, null, null, "testGame", game);
+        GameData testData = new GameData(5, null, null, "testGame", game, false);
 
         assertNotNull(serverFacade.listGames(testAuth));
     }
@@ -163,7 +163,7 @@ public class ServerFacadeTests {
         UserData testUser = new UserData("testUser", "testPassword", "testEmail");
         AuthData testAuth = serverFacade.registerUser(testUser);
         ChessGame game = new ChessGame();
-        GameData testData = new GameData(5, null, null, "testGame", game);
+        GameData testData = new GameData(5, null, null, "testGame", game, false);
 
         AuthData failAuth = new AuthData(null, null);
         assertThrows(ResponseException.class, () -> serverFacade.createGame(testData, failAuth));
@@ -174,7 +174,7 @@ public class ServerFacadeTests {
         UserData testUser = new UserData("testUser", "testPassword", "testEmail");
         AuthData testAuth = serverFacade.registerUser(testUser);
 
-        GameData testData = new GameData(5, null, null, "testGame", null);
+        GameData testData = new GameData(5, null, null, "testGame", null, false);
 
         int id = gameDAO.createGame(testData);
         JoinGameRequest join = new JoinGameRequest(id, testUser.username(), "WHITE");
@@ -191,7 +191,7 @@ public class ServerFacadeTests {
         AuthData testAuth = serverFacade.registerUser(testUser);
 
         ChessGame game = new ChessGame();
-        GameData testData = new GameData(0, null, null, "testGame", game);
+        GameData testData = new GameData(0, null, null, "testGame", game, false);
 
         int id = gameDAO.createGame(testData);
 
