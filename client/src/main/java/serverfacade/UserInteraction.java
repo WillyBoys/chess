@@ -130,7 +130,7 @@ public class UserInteraction {
             try {
                 if (params.length >= 1) {
                     String name = params[0];
-                    GameData gameName = new GameData(0, null, null, name, null);
+                    GameData gameName = new GameData(0, null, null, name, null, false);
                     server.createGame(gameName, authData);
                 }
             } catch (ResponseException e) {

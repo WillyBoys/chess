@@ -35,7 +35,7 @@ public class WebSocketFacade extends Endpoint {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
                     //Depending on the type, do what the type is
                     //Re jsonify it and send it to
-                    notificationHandler.notify(notification);
+                    //notificationHandler.notify(notification);
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {

@@ -33,26 +33,31 @@ public class GamingInteraction {
 
     public String redrawChessBoard() {
         //THIS WILL REDRAW THE CHESS BOARD IN THE CURRENT STATE
+        return "";
     }
 
     public String leaveGame() {
         //THIS WILL TAKE THE USER OUT OF THE GAME
+        return "";
     }
 
     public String makeMove(String... params) {
         //Take in the START and END position for this part
         //Make the Move and update the Chess Board
+        return "";
     }
 
     public String resignGame() {
         //First ask them to confirm that they want to resign
         //If YES, resign the game and the opponent wins
         //If NO, return to the gameplay state
+        return "";
     }
 
     public String highlightMoves(String... params) {
         //Create the ChessPosition from the input
         //Highlight the available moves
+        return "";
     }
 
     public String help() throws ResponseException {
