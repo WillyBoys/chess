@@ -36,7 +36,7 @@ public class WebSocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException, DataAccessException {
-        System.out.println(message);
+        //System.out.println(message);
         var action = new Gson().fromJson(message, UserGameCommand.class);
         try {
             switch (action.getCommandType()) {
@@ -251,7 +251,7 @@ public class WebSocketHandler {
     }
 
     public void errorHandler(String message, int gameID, Session session) throws IOException {
-        System.out.println(message);
+        //System.out.println(message);
         if (message.equals("Error: Game ID is not valid")) {
             connections.add(gameID, session);
             var errorMessage = String.format("Error: You have entered an incorrect ID");
