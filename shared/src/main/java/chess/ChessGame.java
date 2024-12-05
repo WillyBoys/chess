@@ -85,7 +85,7 @@ public class ChessGame {
         // Do this after determining whether the King is in check and checking for valid moves
         ChessPiece piece = board.getPiece(move.getStartPosition());
         if (piece == null) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("There is no piece here");
         }
         Collection<ChessMove> valid = validMoves(move.getStartPosition());
         if (valid.contains(move) && piece.getTeamColor() == currentTurn) {
@@ -104,7 +104,7 @@ public class ChessGame {
                 currentTurn = TeamColor.WHITE;
             }
         } else {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("Invalid Move");
         }
 
     }

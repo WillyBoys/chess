@@ -2,7 +2,6 @@ package server.websocket;
 
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
-import server.Server;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -10,17 +9,17 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
-    public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Session, Connection> connections = new ConcurrentHashMap<>();
 
-    public void add(String gameID, Session session) {
+    public void add(int gameID, Session session) {
         var connection = new Connection(gameID, session);
-        connections.put(gameID, connection);
+        connections.put(session, connection);
     }
 
-    public void self(String username, ServerMessage notification) throws IOException {
+    public void self(int gameID, Session currentSession, ServerMessage notification) throws IOException {
         for (var c : connections.values()) {
-            if (c.session.isOpen()) {
-                if (c.visitorName.equals(username)) {
+            if (c.session.isOpen() && c.gameID == gameID) {
+                if (c.session.equals(currentSession)) {
                     String jsonMessage = new Gson().toJson(notification);
                     c.send(jsonMessage);
                 }
@@ -28,15 +27,15 @@ public class ConnectionManager {
         }
     }
 
-    public void remove(String visitorName) {
-        connections.remove(visitorName);
+    public void remove(Session session) {
+        connections.remove(session);
     }
 
-    public void broadcast(String excludeVisitorName, ServerMessage notification) throws IOException {
+    public void broadcast(int gameID, Session currentSession, ServerMessage notification) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
-            if (c.session.isOpen()) {
-                if (!c.visitorName.equals(excludeVisitorName)) {
+            if (c.session.isOpen() && c.gameID == gameID) {
+                if (!c.session.equals(currentSession)) {
                     String jsonMessage = new Gson().toJson(notification);
                     c.send(jsonMessage);
                 }
@@ -47,7 +46,7 @@ public class ConnectionManager {
 
         // Clean up any connections that were left open.
         for (var c : removeList) {
-            connections.remove(c.visitorName);
+            connections.remove(c.gameID);
 
         }
     }

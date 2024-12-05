@@ -56,7 +56,7 @@ public class SqlGameDAO implements GameDAO {
                         ChessGame from = new Gson().fromJson(rs.getString("game"), ChessGame.class);
                         return new GameData(gameID, whiteUsername, blackUsername, gameName, from);
                     } else {
-                        throw new DataAccessException("Error: bad request");
+                        throw new DataAccessException("Error: Game ID is not valid");
                     }
                 }
             }
