@@ -33,8 +33,4 @@ public class Repl implements NotificationHandler {
         }
     }
 
-//    public void notify(UserGameCommand notification) {
-//        System.out.println(SET_TEXT_COLOR_RED + notification);
-//    }
-
 }
