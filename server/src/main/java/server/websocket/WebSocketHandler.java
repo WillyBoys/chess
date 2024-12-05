@@ -192,6 +192,11 @@ public class WebSocketHandler {
     public void resignGame(String authToken, int gameID, Session session) throws DataAccessException, IOException {
         AuthData auth = new AuthData(authToken, null);
         String username = authDAO.getUsername(auth);
+        GameData game = gameDAO.getGame(gameID);
+
+        if (!game.whiteUsername().equals(username) && !game.blackUsername().equals(username)) {
+            throw new DataAccessException("Error: You can't resign");
+        }
 
         //Creates the broadcast message
         var message = String.format("%s resigned the game", username);
@@ -245,6 +250,12 @@ public class WebSocketHandler {
         } else if (message.equals("Error: It isn't your turn")) {
             connections.add(gameID, session);
             var errorMessage = String.format("Error: It isn't your turn");
+            var errorNotification = new Erroring(ServerMessage.ServerMessageType.ERROR, errorMessage);
+            connections.self(gameID, session, errorNotification);
+            connections.remove(session);
+        } else if (message.equals("Error: You can't resign")) {
+            connections.add(gameID, session);
+            var errorMessage = String.format("Error: You can't resign. You aren't in the game");
             var errorNotification = new Erroring(ServerMessage.ServerMessageType.ERROR, errorMessage);
             connections.self(gameID, session, errorNotification);
             connections.remove(session);
