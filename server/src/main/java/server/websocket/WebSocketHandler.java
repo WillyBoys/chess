@@ -10,6 +10,7 @@ import dataaccess.SqlGameDAO;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.MakeMove;
@@ -45,6 +46,11 @@ public class WebSocketHandler {
             errorHandler(ex.getMessage(), action.getGameID(), session);
         }
 
+    }
+
+    @OnWebSocketClose
+    public void onClose(Session session, int statusCode, String reason) {
+        connections.remove(session);
     }
 
     private void connectGame(String authToken, int gameID, Session session) throws IOException, DataAccessException {
