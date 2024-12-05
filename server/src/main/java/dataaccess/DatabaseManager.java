@@ -63,7 +63,8 @@ public class DatabaseManager {
                 "whiteUsername varchar(255), " +
                 "blackUsername varchar(255), " +
                 "gameName varchar(255), game text, " +
-                "PRIMARY KEY (gameID))";
+                "PRIMARY KEY (gameID), " +
+                "gameOver BOOLEAN DEFAULT FALSE)";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(userStatement)) {
                 preparedStatement.executeUpdate();

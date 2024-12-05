@@ -26,13 +26,14 @@ public class SqlGameDAO implements GameDAO {
             throw new DataAccessException("Error: bad request");
         }
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = conn.prepareStatement("INSERT INTO Game (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)");
+            var statement = conn.prepareStatement("INSERT INTO Game (gameID, whiteUsername, blackUsername, gameName, game, gameOver) VALUES (?, ?, ?, ?, ?, ?)");
             statement.setInt(1, game.gameID());
             statement.setString(2, game.whiteUsername());
             statement.setString(3, game.blackUsername());
             statement.setString(4, game.gameName());
             var jState = new Gson().toJson(game.game());
             statement.setString(5, jState);
+            statement.setBoolean(6, game.gameOver());
             statement.executeUpdate();
             return game.gameID();
         } catch (SQLException e) {
@@ -54,7 +55,8 @@ public class SqlGameDAO implements GameDAO {
                         String blackUsername = rs.getString("blackUsername");
                         String gameName = rs.getString("gameName");
                         ChessGame from = new Gson().fromJson(rs.getString("game"), ChessGame.class);
-                        return new GameData(gameID, whiteUsername, blackUsername, gameName, from);
+                        boolean gameOver = rs.getBoolean("gameOver");
+                        return new GameData(gameID, whiteUsername, blackUsername, gameName, from, gameOver);
                     } else {
                         throw new DataAccessException("Error: Game ID is not valid");
                     }
@@ -78,7 +80,8 @@ public class SqlGameDAO implements GameDAO {
                         String blackUsername = rs.getString("blackUsername");
                         String gameName = rs.getString("gameName");
                         ChessGame game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
-                        GameData id = new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+                        boolean gameOver = rs.getBoolean("gameOver");
+                        GameData id = new GameData(gameID, whiteUsername, blackUsername, gameName, game, gameOver);
                         games.add(id);
                     }
                     return games;
@@ -95,14 +98,21 @@ public class SqlGameDAO implements GameDAO {
             throw new DataAccessException("Error: bad request");
         }
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = conn.prepareStatement("UPDATE Game SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID = ?");
-            statement.setString(1, data.whiteUsername());
-            statement.setString(2, data.blackUsername());
-            statement.setString(3, data.gameName());
-            var jState = new Gson().toJson(data.game());
-            statement.setString(4, jState);
-            statement.setInt(5, data.gameID());
+            var statement = conn.prepareStatement("DELETE FROM Game WHERE gameID = ?");
+            statement.setString(1, Integer.toString(data.gameID()));
             statement.executeUpdate();
+            createGame(data);
+//            var statement = conn.prepareStatement("UPDATE Game SET whiteUsername=?, blackUsername=?, gameName=?, game=?, gameOver=? WHERE gameID = ?");
+//            statement.setString(1, data.whiteUsername());
+//            statement.setString(2, data.blackUsername());
+//            statement.setString(3, data.gameName());
+//            var jState = new Gson().toJson(data.game());
+//            System.out.println("Current Color going into the database:" + data.game().getTeamTurn() + " GameID: " + data.gameID());
+//            statement.setString(4, jState);
+//            statement.setInt(5, data.gameID());
+//            statement.setBoolean(6, data.gameOver());
+//            statement.executeUpdate();
+//            System.out.println("LIST OF GAMES: " + listGame().toString() + "\n");
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }

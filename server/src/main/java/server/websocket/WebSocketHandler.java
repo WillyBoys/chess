@@ -14,6 +14,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.junit.platform.engine.support.descriptor.FileSystemSource;
 import websocket.commands.MakeMove;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
@@ -72,7 +73,6 @@ public class WebSocketHandler {
         }
     }
 
-    //THIS ONE NEEDS SOME WORK. HOW TO INCORPORATE MAKEMOVE COMMAND
     private void makeMove(String message, int gameID, Session session, String authToken) throws IOException, DataAccessException {
         AuthData auth = new AuthData(authToken, null);
         String username = authDAO.getUsername(auth);
@@ -84,13 +84,68 @@ public class WebSocketHandler {
             //Get the Game info and Make the Move
             GameData game = gameDAO.getGame(gameID);
             ChessMove move = info.getMove();
+
+            if (game.getGameOver()) {
+                throw new DataAccessException("Error: Game is Over");
+            }
+
+            var currentTurn = game.game().getTeamTurn();
+            if (!game.whiteUsername().equals(username) && currentTurn.equals(ChessGame.TeamColor.WHITE)) {
+                throw new DataAccessException("Error: It isn't your turn");
+            } else if (!game.blackUsername().equals(username) && currentTurn.equals(ChessGame.TeamColor.BLACK)) {
+                throw new DataAccessException("Error: It isn't your turn");
+            }
+
             game.game().makeMove(move);
+            gameDAO.updateGame(game);
+
+            //Load the Game for everyone
+            var loadGame = new Loading(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
+            connections.self(gameID, session, loadGame);
+            connections.broadcast(gameID, session, loadGame);
+
+            //Notify the other players
+            var messaging = String.format("%s has made a move", username);
+            var notifying = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messaging);
+            connections.broadcast(gameID, session, notifying);
 
             ChessPiece piece = game.game().getBoard().getPiece(move.getEndPosition());
             var currentColor = piece.getTeamColor();
 
+            //Check whether a color is in checkmate
+            if (game.game().isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                var messageStuff = "Black is in Checkmate";
+                GameData gameData1 = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), true);
+                gameDAO.updateGame(gameData1);
+                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
+                connections.broadcast(gameID, session, notification);
+                connections.self(gameID, session, notification);
+            } else if (game.game().isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                var messageStuff = "White is in Checkmate";
+                GameData gameData1 = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), true);
+                gameDAO.updateGame(gameData1);
+                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
+                connections.broadcast(gameID, session, notification);
+                connections.self(gameID, session, notification);
+            }
+            //Check whether a color is in stalemate
+            else if (game.game().isInStalemate(ChessGame.TeamColor.BLACK)) {
+                var messageStuff = "Black is in Stalemate";
+                GameData gameData1 = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), true);
+                gameDAO.updateGame(gameData1);
+                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
+                connections.broadcast(gameID, session, notification);
+                connections.self(gameID, session, notification);
+            } else if (game.game().isInStalemate(ChessGame.TeamColor.WHITE)) {
+                var messageStuff = "White is in Stalemate";
+                GameData gameData1 = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), true);
+                gameDAO.updateGame(gameData1);
+                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
+                connections.broadcast(gameID, session, notification);
+                connections.self(gameID, session, notification);
+            }
             //Check Whether a Color is in Check
-            if (game.game().isInCheck(ChessGame.TeamColor.BLACK)) {
+            else if (game.game().isInCheck(ChessGame.TeamColor.BLACK)) {
                 var messageStuff = "Black is in Check";
                 var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
                 connections.broadcast(gameID, session, notification);
@@ -102,41 +157,7 @@ public class WebSocketHandler {
                 connections.self(gameID, session, notification);
             }
 
-            //Check whether a color is in checkmate
-            if (game.game().isInCheckmate(ChessGame.TeamColor.BLACK)) {
-                var messageStuff = "Black is in Checkmate";
-                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
-                connections.broadcast(gameID, session, notification);
-                connections.self(gameID, session, notification);
-            } else if (game.game().isInCheckmate(ChessGame.TeamColor.WHITE)) {
-                var messageStuff = "White is in Checkmate";
-                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
-                connections.broadcast(gameID, session, notification);
-                connections.self(gameID, session, notification);
-            }
 
-            //Check whether a color is in stalemate
-            if (game.game().isInStalemate(ChessGame.TeamColor.BLACK)) {
-                var messageStuff = "Black is in Stalemate";
-                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
-                connections.broadcast(gameID, session, notification);
-                connections.self(gameID, session, notification);
-            } else if (game.game().isInStalemate(ChessGame.TeamColor.WHITE)) {
-                var messageStuff = "White is in Stalemate";
-                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
-                connections.broadcast(gameID, session, notification);
-                connections.self(gameID, session, notification);
-            }
-
-            //Notify the other players
-            var messageStuff = String.format("%s has made a move", username);
-            var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
-            connections.broadcast(gameID, session, notification);
-
-            //Load the Game for the root client
-            var loadGame = new Loading(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
-            connections.self(gameID, session, loadGame);
-            connections.broadcast(gameID, session, loadGame);
         } catch (Exception ex) {
             errorHandler(ex.getMessage(), gameID, session);
         }
@@ -155,10 +176,10 @@ public class WebSocketHandler {
         //Update the Game to Show Logged Out
         GameData gameData = gameDAO.getGame(gameID);
         if (gameData.whiteUsername().equals(username)) {
-            GameData gameData1 = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game());
+            GameData gameData1 = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game(), gameData.gameOver());
             gameDAO.updateGame(gameData1);
         } else if (gameData.blackUsername().equals(username)) {
-            GameData gameData1 = new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
+            GameData gameData1 = new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game(), gameData.gameOver());
             gameDAO.updateGame(gameData1);
         }
 
@@ -175,7 +196,18 @@ public class WebSocketHandler {
         //Creates the broadcast message
         var message = String.format("%s resigned the game", username);
         var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.self(gameID, session, notification);
         connections.broadcast(gameID, session, notification);
+
+        //Update Game Data
+        GameData gameData = gameDAO.getGame(gameID);
+        if (gameData.whiteUsername().equals(username)) {
+            GameData gameData1 = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game(), true);
+            gameDAO.updateGame(gameData1);
+        } else if (gameData.blackUsername().equals(username)) {
+            GameData gameData1 = new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game(), true);
+            gameDAO.updateGame(gameData1);
+        }
 
         //Create the root client message
 
@@ -201,6 +233,18 @@ public class WebSocketHandler {
         } else if (message.equals("Invalid Move")) {
             connections.add(gameID, session);
             var errorMessage = String.format("Error: You have made an invalid move");
+            var errorNotification = new Erroring(ServerMessage.ServerMessageType.ERROR, errorMessage);
+            connections.self(gameID, session, errorNotification);
+            connections.remove(session);
+        } else if (message.equals("Error: Game is Over")) {
+            connections.add(gameID, session);
+            var errorMessage = String.format("Error: You can't make a move. The Game is Over");
+            var errorNotification = new Erroring(ServerMessage.ServerMessageType.ERROR, errorMessage);
+            connections.self(gameID, session, errorNotification);
+            connections.remove(session);
+        } else if (message.equals("Error: It isn't your turn")) {
+            connections.add(gameID, session);
+            var errorMessage = String.format("Error: It isn't your turn");
             var errorNotification = new Erroring(ServerMessage.ServerMessageType.ERROR, errorMessage);
             connections.self(gameID, session, errorNotification);
             connections.remove(session);

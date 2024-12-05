@@ -33,9 +33,8 @@ public class WebSocketFacade extends Endpoint {
                 @Override
                 public void onMessage(String message) {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-                    notification.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION
-                        //Depending on the type, do what the type is
-                        //Re jsonify it and send it to
+                    //Depending on the type, do what the type is
+                    //Re jsonify it and send it to
                     notificationHandler.notify(notification);
                 }
             });

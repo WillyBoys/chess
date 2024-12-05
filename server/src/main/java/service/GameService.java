@@ -41,7 +41,7 @@ public class GameService {
         }
 
         ChessGame board = new ChessGame();
-        GameData gameData = new GameData(id, null, null, gameName, board);
+        GameData gameData = new GameData(id, null, null, gameName, board, false);
 
         gameDAO.createGame(gameData);
 
@@ -67,13 +67,13 @@ public class GameService {
             if (data.blackUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            GameData game = new GameData(data.gameID(), data.whiteUsername(), auth.username(), data.gameName(), data.game());
+            GameData game = new GameData(data.gameID(), data.whiteUsername(), auth.username(), data.gameName(), data.game(), data.gameOver());
             gameDAO.updateGame(game);
         } else {
             if (data.whiteUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            GameData game = new GameData(data.gameID(), auth.username(), data.blackUsername(), data.gameName(), data.game());
+            GameData game = new GameData(data.gameID(), auth.username(), data.blackUsername(), data.gameName(), data.game(), data.gameOver());
             gameDAO.updateGame(game);
         }
     }

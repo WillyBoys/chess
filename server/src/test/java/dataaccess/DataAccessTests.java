@@ -153,7 +153,7 @@ public class DataAccessTests {
     @Test
     public void gameClear() throws DataAccessException {
         ChessGame game = new ChessGame();
-        GameData testGame = new GameData(1, "white", "black", "game", game);
+        GameData testGame = new GameData(1, "white", "black", "game", game, false);
         gameDAO.createGame(testGame);
 
         gameDAO.clear();
@@ -164,7 +164,7 @@ public class DataAccessTests {
     @Test
     public void createGameSuccess() throws DataAccessException {
         ChessGame game = new ChessGame();
-        GameData testGame = new GameData(1, "white", "black", "game", game);
+        GameData testGame = new GameData(1, "white", "black", "game", game, false);
         gameDAO.createGame(testGame);
 
         assertEquals(1, gameDAO.listGame().size());
@@ -178,7 +178,7 @@ public class DataAccessTests {
     @Test
     public void getGameSuccess() throws DataAccessException {
         ChessGame game = new ChessGame();
-        GameData testGame = new GameData(1, "white", "black", "game", game);
+        GameData testGame = new GameData(1, "white", "black", "game", game, false);
         int id = gameDAO.createGame(testGame);
 
         assertEquals(id, testGame.gameID());
@@ -192,10 +192,10 @@ public class DataAccessTests {
     @Test
     public void listGameSuccess() throws DataAccessException {
         ChessGame game = new ChessGame();
-        GameData testGame = new GameData(1, "white", "black", "game", game);
+        GameData testGame = new GameData(1, "white", "black", "game", game, false);
         gameDAO.createGame(testGame);
         ChessGame game2 = new ChessGame();
-        GameData testGame2 = new GameData(2, "black", "white", "game2", game2);
+        GameData testGame2 = new GameData(2, "black", "white", "game2", game2, false);
         gameDAO.createGame(testGame2);
 
         assertEquals(gameDAO.listGame().size(), 2);
@@ -204,13 +204,13 @@ public class DataAccessTests {
     @Test
     public void updateGameSuccess() throws DataAccessException {
         ChessGame game = new ChessGame();
-        GameData testGame = new GameData(1, null, "black", "game", game);
+        GameData testGame = new GameData(1, null, "black", "game", game, false);
         gameDAO.createGame(testGame);
 
-        GameData joinGame = new GameData(1, "testUser", "black", "game", game);
+        GameData joinGame = new GameData(1, "testUser", "black", "game", game, false);
         gameDAO.updateGame(joinGame);
 
-        GameData fullGame = new GameData(1, "testUser", "black", "game", game);
+        GameData fullGame = new GameData(1, "testUser", "black", "game", game, false);
 
         assertEquals(fullGame, gameDAO.getGame(1));
     }
