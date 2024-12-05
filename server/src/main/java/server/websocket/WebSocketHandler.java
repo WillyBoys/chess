@@ -9,17 +9,13 @@ import dataaccess.SqlAuthDAO;
 import dataaccess.SqlGameDAO;
 import model.AuthData;
 import model.GameData;
-import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.junit.platform.engine.support.descriptor.FileSystemSource;
 import websocket.commands.MakeMove;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
 
-import java.io.EOFException;
 import java.io.IOException;
 
 @WebSocket
