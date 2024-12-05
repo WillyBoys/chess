@@ -1,10 +1,10 @@
 package websocket.messages;
 
 public class Erroring extends ServerMessage {
-    private final String message;
+    private final String errorMessage;
 
-    public Erroring(ServerMessageType type, String message) {
+    public Erroring(ServerMessageType type, String errorMessage) {
         super(type);
-        this.message = message;
+        this.errorMessage = errorMessage;
     }
 }

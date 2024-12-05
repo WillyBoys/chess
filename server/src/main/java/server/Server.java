@@ -26,7 +26,7 @@ public class Server {
     private final WebSocketHandler webSocketHandler;
 
     public Server() {
-        webSocketHandler = new WebSocketHandler(authDAO);
+        webSocketHandler = new WebSocketHandler(authDAO, gameDAO);
         try {
             DatabaseManager.configureDatabase();
         } catch (DataAccessException e) {
