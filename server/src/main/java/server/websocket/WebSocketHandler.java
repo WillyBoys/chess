@@ -167,22 +167,51 @@ public class WebSocketHandler {
     public void leaveGame(String authToken, int gameID, Session session) throws IOException, DataAccessException {
         AuthData auth = new AuthData(authToken, null);
         String username = authDAO.getUsername(auth);
+        GameData game = gameDAO.getGame(gameID);
 
-        //Creates the broadcast message
         var message = String.format("%s left the game", username);
+        //System.out.println(message);
         var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(gameID, session, notification);
 
-        //Update the Game to Show Logged Out
-        GameData gameData = gameDAO.getGame(gameID);
-        if (gameData.whiteUsername().equals(username)) {
-            GameData gameData1 = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game(), gameData.gameOver());
-            gameDAO.updateGame(gameData1);
-        } else if (gameData.blackUsername().equals(username)) {
-            GameData gameData1 = new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game(), gameData.gameOver());
-            gameDAO.updateGame(gameData1);
+        if (game.whiteUsername() != null) {
+            if (game.whiteUsername().equals(username)) {
+                GameData gameData1 = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), game.gameOver());
+                //System.out.println("Updating game with GAMEID: " + game.gameID());
+                gameDAO.updateGame(gameData1);
+            }
+        } else if (game.blackUsername() != null) {
+            if (game.blackUsername().equals(username)) {
+                GameData gameData1 = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game(), game.gameOver());
+                //System.out.println("Updating game with GAMEID: " + game.gameID());
+                gameDAO.updateGame(gameData1);
+            }
         }
 
+//        if (game.whiteUsername() != null) {
+//            if (game.whiteUsername().equals(username)) {
+//                //Creates the broadcast message
+//                var message = String.format("%s left the game", username);
+//                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, message);
+//                connections.broadcast(gameID, session, notification);
+//
+//                //Update Game to show Logged Out
+//                GameData gameData1 = new GameData(gameID, null, game.blackUsername(), game.gameName(), game.game(), game.gameOver());
+//                System.out.println("Updating game with GAMEID: " + gameID);
+//                gameDAO.updateGame(gameData1);
+//            }
+//        } else if (game.blackUsername() != null) {
+//            if (game.blackUsername().equals(username)) {
+//                //Creates the broadcast message
+//                var message = String.format("%s left the game", username);
+//                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, message);
+//                connections.broadcast(gameID, session, notification);
+//
+//                GameData gameData1 = new GameData(gameID, game.whiteUsername(), null, game.gameName(), game.game(), game.gameOver());
+//                System.out.println("Updating game with GAMEID: " + gameID);
+//                gameDAO.updateGame(gameData1);
+//            }
+//        }
 
         //Remove the Connection
         connections.remove(session);
