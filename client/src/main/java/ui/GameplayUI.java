@@ -17,9 +17,9 @@ public class GameplayUI {
     private static int letterTrackerAfter = 0;
     private static int printPieces = 0;
     static String[] whiteTopPieces = {" R ", " N ", " B ", " K ", " Q ", " B ", " N ", " R ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " P "};
-    static String[] whiteBottomPieces = {" P ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " R ", " N ", " B ", " Q ", " K ", " B ", " N ", " R "};
+    static String[] whiteBottom = {" P ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " R ", " N ", " B ", " Q ", " K ", " B ", " N ", " R "};
     static String[] blackTopPieces = {" R ", " N ", " B ", " Q ", " K ", " B ", " N ", " R ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " P "};
-    static String[] blackBottomPieces = {" P ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " R ", " N ", " B ", " K ", " Q ", " B ", " N ", " R "};
+    static String[] blackBottom = {" P ", " P ", " P ", " P ", " P ", " P ", " P ", " P ", " R ", " N ", " B ", " K ", " Q ", " B ", " N ", " R "};
 
 
     // Padded characters.
@@ -186,9 +186,9 @@ public class GameplayUI {
             }
         } else if (playerWhite && boardRow > 6) {
             if (black) {
-                printWhitePiecesOnBlack(out, whiteBottomPieces);
+                printWhitePiecesOnBlack(out, whiteBottom);
             } else {
-                printWhitePiecesOnWhite(out, whiteBottomPieces);
+                printWhitePiecesOnWhite(out, whiteBottom);
             }
         } else if (!playerWhite && boardRow < 3) {
             if (black) {
@@ -198,9 +198,9 @@ public class GameplayUI {
             }
         } else if (!playerWhite && boardRow > 6) {
             if (black) {
-                printBlackPiecesOnBlack(out, blackBottomPieces);
+                printBlackPiecesOnBlack(out, blackBottom);
             } else {
-                printBlackPiecesOnWhite(out, blackBottomPieces);
+                printBlackPiecesOnWhite(out, blackBottom);
             }
         } else {
             if (black) {

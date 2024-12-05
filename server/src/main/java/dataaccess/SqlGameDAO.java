@@ -26,7 +26,8 @@ public class SqlGameDAO implements GameDAO {
             throw new DataAccessException("Error: bad request");
         }
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = conn.prepareStatement("INSERT INTO Game (gameID, whiteUsername, blackUsername, gameName, game, gameOver) VALUES (?, ?, ?, ?, ?, ?)");
+            String stuff = "INSERT INTO Game (gameID, whiteUsername, blackUsername, gameName, game, gameOver) VALUES (?, ?, ?, ?, ?, ?)";
+            var statement = conn.prepareStatement(stuff);
             statement.setInt(1, game.gameID());
             statement.setString(2, game.whiteUsername());
             statement.setString(3, game.blackUsername());
@@ -102,17 +103,6 @@ public class SqlGameDAO implements GameDAO {
             statement.setString(1, Integer.toString(data.gameID()));
             statement.executeUpdate();
             createGame(data);
-//            var statement = conn.prepareStatement("UPDATE Game SET whiteUsername=?, blackUsername=?, gameName=?, game=?, gameOver=? WHERE gameID = ?");
-//            statement.setString(1, data.whiteUsername());
-//            statement.setString(2, data.blackUsername());
-//            statement.setString(3, data.gameName());
-//            var jState = new Gson().toJson(data.game());
-//            System.out.println("Current Color going into the database:" + data.game().getTeamTurn() + " GameID: " + data.gameID());
-//            statement.setString(4, jState);
-//            statement.setInt(5, data.gameID());
-//            statement.setBoolean(6, data.gameOver());
-//            statement.executeUpdate();
-//            System.out.println("LIST OF GAMES: " + listGame().toString() + "\n");
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }

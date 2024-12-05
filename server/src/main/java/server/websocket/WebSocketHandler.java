@@ -184,31 +184,6 @@ public class WebSocketHandler {
             }
         }
 
-//        if (game.whiteUsername() != null) {
-//            if (game.whiteUsername().equals(username)) {
-//                //Creates the broadcast message
-//                var message = String.format("%s left the game", username);
-//                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, message);
-//                connections.broadcast(gameID, session, notification);
-//
-//                //Update Game to show Logged Out
-//                GameData gameData1 = new GameData(gameID, null, game.blackUsername(), game.gameName(), game.game(), game.gameOver());
-//                System.out.println("Updating game with GAMEID: " + gameID);
-//                gameDAO.updateGame(gameData1);
-//            }
-//        } else if (game.blackUsername() != null) {
-//            if (game.blackUsername().equals(username)) {
-//                //Creates the broadcast message
-//                var message = String.format("%s left the game", username);
-//                var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, message);
-//                connections.broadcast(gameID, session, notification);
-//
-//                GameData gameData1 = new GameData(gameID, game.whiteUsername(), null, game.gameName(), game.game(), game.gameOver());
-//                System.out.println("Updating game with GAMEID: " + gameID);
-//                gameDAO.updateGame(gameData1);
-//            }
-//        }
-
         //Remove the Connection
         connections.remove(session);
 
@@ -287,58 +262,3 @@ public class WebSocketHandler {
         }
     }
 }
-//
-//package server.websocket;
-//
-//import com.google.gson.Gson;
-//import org.eclipse.jetty.websocket.api.Session;
-//import org.eclipse.jetty.websocket.api.annotations.*;
-//
-//import java.io.IOException;
-//import java.util.Map;
-//import java.util.concurrent.ConcurrentHashMap;
-//
-//import websocket.commands.UserGameCommand;
-//import websocket.messages.ServerMessage;
-//
-//@WebSocket
-//public class WebSocketHandler {
-//    private static Map<Session, String> clients = new ConcurrentHashMap<>();
-//
-//    @OnWebSocketConnect
-//    public void onConnect(Session session) throws Exception {
-////        System.out.println("New client connected: " + session.getRemoteAddress().getAddress());
-////        clients.put(session, session.getRemoteAddress().getAddress().toString());
-//    }
-//
-//    @OnWebSocketClose
-//    public void onClose(Session session, int statusCode, String reason) {
-////        System.out.println("Client disconnected: " + clients.get(session));
-////        clients.remove(session);
-//    }
-//
-//    @OnWebSocketMessage
-//    public void onMessage(Session session, String message) throws IOException {
-//        System.out.println("Message from " + clients.get(session) + ": " + message);
-//        var cmd = new Gson().fromJson(message, UserGameCommand.class);
-//        switch (cmd.getCommandType()) {
-//            case CONNECT:
-//                System.out.println("CONNECT");
-//                break;
-//            case MAKE_MOVE:
-//                System.out.println("MAKE MOVE");
-//                break;
-//            case LEAVE:
-//                System.out.println("LEAVE");
-//                break;
-//            case RESIGN:
-//                System.out.println("RESIGN");
-//                break;
-//        }
-//    }
-//
-//    @OnWebSocketError
-//    public void onError(Session session, Throwable error) {
-//        System.out.println("Error for client " + clients.get(session) + ": " + error.getMessage());
-//    }
-//}
