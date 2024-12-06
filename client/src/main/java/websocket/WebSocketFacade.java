@@ -1,12 +1,15 @@
 package websocket;
 
+import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
-import model.JoinGameRequest;
+import ui.GameplayUI;
+import websocket.commands.MakeMove;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
+import websocket.messages.*;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -32,10 +35,22 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-                    //Depending on the type, do what the type is
-                    //Re jsonify it and send it to
-                    //notificationHandler.notify(notification);
+                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+                    try {
+                        switch (serverMessage.getServerMessageType()) {
+                            case NOTIFICATION:
+                                handleNotification(message);
+                                break;
+                            case ERROR:
+                                handleError(message);
+                                break;
+                            case LOAD_GAME:
+                                handleLoadGame(message);
+                                break;
+                        }
+                    } catch (Exception ex) {
+                        throw new RuntimeException("I am still getting things together");
+                    }
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -48,42 +63,54 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void enterGame(AuthData auth, JoinGameRequest join) throws ResponseException {
+    public void handleNotification(String serverMessage) throws ResponseException {
         try {
-            var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, auth.authToken(), join.gameID());
-            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-        } catch (IOException ex) {
+            var action = new Gson().fromJson(serverMessage, Notifying.class);
+            System.out.println(action.getMessage());
+        } catch (Exception ex) {
             throw new ResponseException(500, ex.getMessage());
         }
     }
 
-    public void makeMove(AuthData auth, GameData game) throws ResponseException {
+
+    public void handleError(String serverMessage) throws ResponseException {
         try {
-            var action = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, auth.authToken(), game.gameID());
-            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-        } catch (IOException ex) {
+            var action = new Gson().fromJson(serverMessage, Erroring.class);
+            System.out.println(action.getErrorMessage());
+        } catch (Exception ex) {
             throw new ResponseException(500, ex.getMessage());
         }
     }
 
-    public void leaveGame(AuthData auth, GameData game) throws ResponseException {
+    public void handleLoadGame(String serverMessage) throws ResponseException {
         try {
-            var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, auth.authToken(), game.gameID());
-            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-            this.session.close();
-        } catch (IOException ex) {
+            var action = new Gson().fromJson(serverMessage, Loading.class);
+            var game = new Gson().toJson(action.game);
+            String[] info = new String[1];
+            info[0] = game;
+            GameplayUI.main(info);
+        } catch (Exception ex) {
             throw new ResponseException(500, ex.getMessage());
         }
     }
 
-    public void resignGame(AuthData auth, GameData game) throws ResponseException {
-        try {
-            var action = new UserGameCommand(UserGameCommand.CommandType.RESIGN, auth.authToken(), game.gameID());
-            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-            this.session.close();
-        } catch (IOException ex) {
-            throw new ResponseException(500, ex.getMessage());
-        }
+    public void connectGame(String authToken, int gameID) throws IOException {
+        var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+        this.session.getBasicRemote().sendText(new Gson().toJson(action));
     }
 
+    public void makeMove(String authToken, int gameID, ChessMove move) throws IOException {
+        var action = new MakeMove(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move);
+        this.session.getBasicRemote().sendText(new Gson().toJson(action));
+    }
+
+    public void leaveGame(String authToken, int gameID) throws IOException {
+        var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+        this.session.getBasicRemote().sendText(new Gson().toJson(action));
+    }
+
+    public void resignGame(String authToken, int gameID) throws IOException {
+        var action = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
+        this.session.getBasicRemote().sendText(new Gson().toJson(action));
+    }
 }

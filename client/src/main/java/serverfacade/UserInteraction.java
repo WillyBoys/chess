@@ -7,6 +7,7 @@ import ui.GameplayUI;
 import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -15,12 +16,12 @@ public class UserInteraction {
     private final ServerFacade server;
     private final String serverUrl;
     private boolean loggedIn = false;
-    private GameData gameData;
     private AuthData authData;
     private UserData userData;
     ArrayList ids = new ArrayList();
     private WebSocketFacade ws;
     private final NotificationHandler notificationHandler;
+    private GamingInteraction gamingInteraction;
 
     public UserInteraction(String serverUrl, NotificationHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
@@ -47,6 +48,8 @@ public class UserInteraction {
             };
         } catch (ResponseException ex) {
             return ex.getMessage();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -152,12 +155,14 @@ public class UserInteraction {
                     int pull = gameID - 1;
                     int actual = (int) ids.get(pull);
                     var join = new JoinGameRequest(actual, userData.username(), params[1]);
-                    ws = new WebSocketFacade(serverUrl, notificationHandler);
-                    ws.enterGame(authData, join);
                     server.joinGame(join, authData);
+                    ws.connectGame(authData.authToken(), actual);
+                    new GamingInteraction(authData.authToken(), gameID);
                 }
             } catch (ResponseException e) {
                 throw new ResponseException(400, e.getMessage() + "\n");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
             GameplayUI.main(params);
@@ -165,7 +170,7 @@ public class UserInteraction {
         }
     }
 
-    public String observeGame(String... params) throws ResponseException {
+    public String observeGame(String... params) throws ResponseException, IOException {
         int gameID = Integer.parseInt(params[0]);
         if (authData == null) {
             return "You are not logged in.\n";
@@ -179,7 +184,7 @@ public class UserInteraction {
                 int actual = (int) ids.get(pull);
                 var join = new JoinGameRequest(actual, userData.username(), params[1]);
                 ws = new WebSocketFacade(serverUrl, notificationHandler);
-                ws.enterGame(authData, join);
+                ws.connectGame(authData.authToken(), gameID);
                 GameplayUI.main(params);
             }
             return ("Enjoy the Game.\n");
