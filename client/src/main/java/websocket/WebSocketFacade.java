@@ -35,6 +35,7 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
+                    System.out.println(message);
                     ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
                     try {
                         switch (serverMessage.getServerMessageType()) {
@@ -85,10 +86,8 @@ public class WebSocketFacade extends Endpoint {
     public void handleLoadGame(String serverMessage) throws ResponseException {
         try {
             var action = new Gson().fromJson(serverMessage, Loading.class);
-            var game = new Gson().toJson(action.game);
-            String[] info = new String[1];
-            info[0] = game;
-            GameplayUI.main(info);
+            GameData gameData = new GameData(0, null, null, null, action.game, false);
+            GameplayUI.displayGame(gameData, action.getGame().getTeamTurn());
         } catch (Exception ex) {
             throw new ResponseException(500, ex.getMessage());
         }
@@ -107,10 +106,12 @@ public class WebSocketFacade extends Endpoint {
     public void leaveGame(String authToken, int gameID) throws IOException {
         var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
         this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        this.session.close();
     }
 
     public void resignGame(String authToken, int gameID) throws IOException {
         var action = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
         this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        this.session.close();
     }
 }

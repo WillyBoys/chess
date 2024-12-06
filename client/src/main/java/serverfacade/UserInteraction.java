@@ -1,5 +1,6 @@
 package serverfacade;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
@@ -11,11 +12,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static chess.ChessGame.TeamColor.BLACK;
+import static chess.ChessGame.TeamColor.WHITE;
+
 // THIS IS THE MAIN INTERACTIONS BETWEEN THE PROGRAM AND CLIENT
 public class UserInteraction {
     private final ServerFacade server;
     private final String serverUrl;
     private boolean loggedIn = false;
+    private GameData gameData;
     private AuthData authData;
     private UserData userData;
     ArrayList ids = new ArrayList();
@@ -144,6 +149,12 @@ public class UserInteraction {
     }
 
     public String joinGame(String... params) throws ResponseException {
+        ChessGame.TeamColor colorChoice = null;
+        if (params[1].equals("BLACK") || params[1].equals("black")) {
+            colorChoice = BLACK;
+        } else {
+            colorChoice = WHITE;
+        }
         if (authData == null) {
             return "You are not logged in.\n";
         } else if (params.length < 2) {
@@ -156,8 +167,13 @@ public class UserInteraction {
                     int actual = (int) ids.get(pull);
                     var join = new JoinGameRequest(actual, userData.username(), params[1]);
                     server.joinGame(join, authData);
+                    ws = new WebSocketFacade(serverUrl, notificationHandler);
                     ws.connectGame(authData.authToken(), actual);
-                    new GamingInteraction(authData.authToken(), gameID);
+                    new GamingInteraction(serverUrl, notificationHandler, authData.authToken(), actual, colorChoice);
+
+                    //I DONT THINK GAME DATA HAS ANYTHING IN IT CURRENTLY
+                    //GameplayUI.displayGame(gameData, colorChoice);
+                    return "\n";
                 }
             } catch (ResponseException e) {
                 throw new ResponseException(400, e.getMessage() + "\n");
@@ -165,12 +181,12 @@ public class UserInteraction {
                 throw new RuntimeException(e);
             }
 
-            GameplayUI.main(params);
-            return "Enjoy your game and good luck!\n";
+            return "There was an error. Try again.";
         }
     }
 
     public String observeGame(String... params) throws ResponseException, IOException {
+        ChessGame.TeamColor colorChoice = WHITE;
         int gameID = Integer.parseInt(params[0]);
         if (authData == null) {
             return "You are not logged in.\n";
@@ -185,7 +201,9 @@ public class UserInteraction {
                 var join = new JoinGameRequest(actual, userData.username(), params[1]);
                 ws = new WebSocketFacade(serverUrl, notificationHandler);
                 ws.connectGame(authData.authToken(), gameID);
-                GameplayUI.main(params);
+
+                //I DONT THINK GAME DATA HAS ANYTHING IN IT CURRENTLY
+                GameplayUI.displayGame(gameData, colorChoice);
             }
             return ("Enjoy the Game.\n");
         }
