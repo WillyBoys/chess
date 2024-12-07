@@ -27,25 +27,32 @@ public class GameplayUI {
         ChessBoard board = gameData.game().getBoard();
 
         if (perspective == ChessGame.TeamColor.BLACK) {
-            drawHeaders(out);
+            drawHeaders(out, perspective);
             for (int i = 1; i <= 8; i++) {
                 drawRow(out, i, board);
             }
-            drawHeaders(out);
+            drawHeaders(out, perspective);
         } else {
-            drawHeaders(out);
+            drawHeaders(out, perspective);
             for (int i = 8; i >= 1; i--) {
                 drawRow(out, i, board);
             }
-            drawHeaders(out);
+            drawHeaders(out, perspective);
         }
     }
 
-    private static void drawHeaders(PrintStream out) {
+    private static void drawHeaders(PrintStream out, ChessGame.TeamColor perspective) {
         String[] headers = {"a", "b", "c", "d", "e", "f", "g", "h"};
         out.print(borderFormat(" "));
-        for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
-            out.print(borderFormat(headers[boardCol]));
+
+        if (perspective.equals(ChessGame.TeamColor.BLACK)) {
+            for (int i = 7; i >= 0; i--) {
+                out.print(borderFormat(headers[i]));
+            }
+        } else {
+            for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
+                out.print(borderFormat(headers[boardCol]));
+            }
         }
         out.println("   " + RESET_TEXT_COLOR + RESET_BG_COLOR);
     }

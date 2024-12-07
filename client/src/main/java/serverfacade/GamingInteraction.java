@@ -23,13 +23,13 @@ public class GamingInteraction {
     private WebSocketFacade ws;
     String authToken;
     int gameID;
-    private ServerFacade serverFacade;
+    private final ServerFacade serverFacade;
     private final String serverUrl;
     private final ChessGame.TeamColor colorChoice;
-    private ChessGame chessGame;
+    private final ChessGame chessGame;
     private final NotificationHandler notificationHandler;
 
-    public GamingInteraction(String serverUrl, NotificationHandler notificationHandler, String authToken, int gameID, ChessGame.TeamColor colorChoice) {
+    public GamingInteraction(String serverUrl, NotificationHandler notificationHandler, String authToken, int gameID, ChessGame.TeamColor colorChoice, WebSocketFacade ws) {
         this.authToken = authToken;
         this.gameID = gameID;
         this.serverUrl = serverUrl;
@@ -37,6 +37,7 @@ public class GamingInteraction {
         this.colorChoice = colorChoice;
         chessGame = new ChessGame();
         this.notificationHandler = notificationHandler;
+        this.ws = ws;
 
         Scanner scanner = new Scanner(System.in);
         var result = "";

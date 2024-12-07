@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
+import serverfacade.GamingInteraction;
 import ui.GameplayUI;
 import websocket.commands.MakeMove;
 import websocket.commands.UserGameCommand;
@@ -35,7 +36,6 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    System.out.println(message);
                     ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
                     try {
                         switch (serverMessage.getServerMessageType()) {
@@ -64,9 +64,9 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void handleNotification(String serverMessage) throws ResponseException {
+    public void handleNotification(String message) throws ResponseException {
         try {
-            var action = new Gson().fromJson(serverMessage, Notifying.class);
+            var action = new Gson().fromJson(message, Notifying.class);
             System.out.println(action.getMessage());
         } catch (Exception ex) {
             throw new ResponseException(500, ex.getMessage());
@@ -86,8 +86,9 @@ public class WebSocketFacade extends Endpoint {
     public void handleLoadGame(String serverMessage) throws ResponseException {
         try {
             var action = new Gson().fromJson(serverMessage, Loading.class);
+            System.out.println(action.getColor());
             GameData gameData = new GameData(0, null, null, null, action.game, false);
-            GameplayUI.displayGame(gameData, action.getGame().getTeamTurn());
+            GameplayUI.displayGame(gameData, action.getColor());
         } catch (Exception ex) {
             throw new ResponseException(500, ex.getMessage());
         }

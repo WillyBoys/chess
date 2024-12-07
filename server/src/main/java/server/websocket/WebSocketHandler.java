@@ -69,8 +69,15 @@ public class WebSocketHandler {
             var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, message);
             connections.broadcast(gameID, session, notification);
 
+            ChessGame.TeamColor color = null;
+            if (game.blackUsername().equals(username)) {
+                color = ChessGame.TeamColor.BLACK;
+            } else {
+                color = ChessGame.TeamColor.WHITE;
+            }
+
             //Create the "Load Game" message for the root client
-            var loadGame = new Loading(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
+            var loadGame = new Loading(ServerMessage.ServerMessageType.LOAD_GAME, game.game(), color);
             connections.self(gameID, session, loadGame);
         }
     }
@@ -101,8 +108,15 @@ public class WebSocketHandler {
             game.game().makeMove(move);
             gameDAO.updateGame(game);
 
+            ChessGame.TeamColor color = null;
+            if (game.blackUsername().equals(username)) {
+                color = ChessGame.TeamColor.BLACK;
+            } else {
+                color = ChessGame.TeamColor.WHITE;
+            }
+
             //Load the Game for everyone
-            var loadGame = new Loading(ServerMessage.ServerMessageType.LOAD_GAME, game.game());
+            var loadGame = new Loading(ServerMessage.ServerMessageType.LOAD_GAME, game.game(), color);
             connections.self(gameID, session, loadGame);
             connections.broadcast(gameID, session, loadGame);
 

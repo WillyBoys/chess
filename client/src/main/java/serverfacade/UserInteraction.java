@@ -169,10 +169,7 @@ public class UserInteraction {
                     server.joinGame(join, authData);
                     ws = new WebSocketFacade(serverUrl, notificationHandler);
                     ws.connectGame(authData.authToken(), actual);
-                    new GamingInteraction(serverUrl, notificationHandler, authData.authToken(), actual, colorChoice);
-
-                    //I DONT THINK GAME DATA HAS ANYTHING IN IT CURRENTLY
-                    //GameplayUI.displayGame(gameData, colorChoice);
+                    new GamingInteraction(serverUrl, notificationHandler, authData.authToken(), actual, colorChoice, ws);
                     return "\n";
                 }
             } catch (ResponseException e) {
