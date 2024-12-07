@@ -11,6 +11,8 @@ import websocket.WebSocketFacade;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import static chess.ChessGame.TeamColor.BLACK;
 import static chess.ChessGame.TeamColor.WHITE;
@@ -126,7 +128,7 @@ public class UserInteraction {
                 result.append(gson.toJson(game.whiteUsername())).append('|');
                 result.append(gson.toJson(game.blackUsername())).append('\n');
             }
-            return result.toString();
+            return result.toString() + "\n";
         }
 
     }
@@ -166,10 +168,21 @@ public class UserInteraction {
                     int pull = gameID - 1;
                     int actual = (int) ids.get(pull);
                     var join = new JoinGameRequest(actual, userData.username(), params[1]);
+                    Collection<GameData> temp = server.listGames(authData).games();
+                    GameData whatIAmLookingFor = null;
+                    for (var i : temp) {
+                        if (i.gameID() == actual) {
+                            whatIAmLookingFor = i;
+                            break;
+                        }
+                    }
+                    if (whatIAmLookingFor == null) {
+                        System.out.println("Issue in UserInteraction when trying to get the game");
+                    }
                     server.joinGame(join, authData);
-                    ws = new WebSocketFacade(serverUrl, notificationHandler);
+                    ws = new WebSocketFacade(serverUrl, notificationHandler, colorChoice, whatIAmLookingFor.game());
                     ws.connectGame(authData.authToken(), actual);
-                    new GamingInteraction(serverUrl, notificationHandler, authData.authToken(), actual, colorChoice, ws);
+                    new GamingInteraction(serverUrl, notificationHandler, authData.authToken(), actual, colorChoice, ws, whatIAmLookingFor);
                     return "\n";
                 }
             } catch (ResponseException e) {
@@ -196,11 +209,21 @@ public class UserInteraction {
                 int pull = gameID - 1;
                 int actual = (int) ids.get(pull);
                 var join = new JoinGameRequest(actual, userData.username(), params[1]);
-                ws = new WebSocketFacade(serverUrl, notificationHandler);
+                Collection<GameData> temp = server.listGames(authData).games();
+                GameData whatIAmLookingFor = null;
+                for (var i : temp) {
+                    if (i.gameID() == actual) {
+                        whatIAmLookingFor = i;
+                        break;
+                    }
+                }
+                if (whatIAmLookingFor == null) {
+                    System.out.println("Issue in UserInteraction when trying to get the game");
+                }
+                ws = new WebSocketFacade(serverUrl, notificationHandler, colorChoice, whatIAmLookingFor.game());
                 ws.connectGame(authData.authToken(), gameID);
 
-                //I DONT THINK GAME DATA HAS ANYTHING IN IT CURRENTLY
-                GameplayUI.displayGame(gameData, colorChoice);
+                new GamingInteraction(serverUrl, notificationHandler, authData.authToken(), actual, colorChoice, ws, whatIAmLookingFor);
             }
             return ("Enjoy the Game.\n");
         }

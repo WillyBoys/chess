@@ -33,7 +33,7 @@ public class WebSocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException, DataAccessException {
-        //System.out.println(message);
+        System.out.println(message);
         var action = new Gson().fromJson(message, UserGameCommand.class);
         try {
             switch (action.getCommandType()) {
@@ -70,7 +70,7 @@ public class WebSocketHandler {
             connections.broadcast(gameID, session, notification);
 
             ChessGame.TeamColor color = null;
-            if (game.blackUsername().equals(username)) {
+            if (game.blackUsername() != null && game.blackUsername().equals(username)) {
                 color = ChessGame.TeamColor.BLACK;
             } else {
                 color = ChessGame.TeamColor.WHITE;
@@ -99,9 +99,10 @@ public class WebSocketHandler {
             }
 
             var currentTurn = game.game().getTeamTurn();
-            if (!game.whiteUsername().equals(username) && currentTurn.equals(ChessGame.TeamColor.WHITE)) {
+            System.out.println(currentTurn);
+            if (game.whiteUsername() != null && !game.whiteUsername().equals(username) && currentTurn.equals(ChessGame.TeamColor.WHITE)) {
                 throw new DataAccessException("Error: It isn't your turn");
-            } else if (!game.blackUsername().equals(username) && currentTurn.equals(ChessGame.TeamColor.BLACK)) {
+            } else if (game.blackUsername() != null && !game.blackUsername().equals(username) && currentTurn.equals(ChessGame.TeamColor.BLACK)) {
                 throw new DataAccessException("Error: It isn't your turn");
             }
 
@@ -109,7 +110,7 @@ public class WebSocketHandler {
             gameDAO.updateGame(game);
 
             ChessGame.TeamColor color = null;
-            if (game.blackUsername().equals(username)) {
+            if (game.blackUsername() != null && game.blackUsername().equals(username)) {
                 color = ChessGame.TeamColor.BLACK;
             } else {
                 color = ChessGame.TeamColor.WHITE;
@@ -131,14 +132,14 @@ public class WebSocketHandler {
             //Check whether a color is in checkmate
             if (game.game().isInCheckmate(ChessGame.TeamColor.BLACK)) {
                 var messageStuff = "Black is in Checkmate";
-                GameData gameData1 = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), true);
+                GameData gameData1 = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
                 gameDAO.updateGame(gameData1);
                 var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
                 connections.broadcast(gameID, session, notification);
                 connections.self(gameID, session, notification);
             } else if (game.game().isInCheckmate(ChessGame.TeamColor.WHITE)) {
                 var messageStuff = "White is in Checkmate";
-                GameData gameData1 = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), true);
+                GameData gameData1 = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
                 gameDAO.updateGame(gameData1);
                 var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
                 connections.broadcast(gameID, session, notification);
@@ -147,14 +148,14 @@ public class WebSocketHandler {
             //Check whether a color is in stalemate
             else if (game.game().isInStalemate(ChessGame.TeamColor.BLACK)) {
                 var messageStuff = "Black is in Stalemate";
-                GameData gameData1 = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), true);
+                GameData gameData1 = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
                 gameDAO.updateGame(gameData1);
                 var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
                 connections.broadcast(gameID, session, notification);
                 connections.self(gameID, session, notification);
             } else if (game.game().isInStalemate(ChessGame.TeamColor.WHITE)) {
                 var messageStuff = "White is in Stalemate";
-                GameData gameData1 = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), true);
+                GameData gameData1 = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
                 gameDAO.updateGame(gameData1);
                 var notification = new Notifying(ServerMessage.ServerMessageType.NOTIFICATION, messageStuff);
                 connections.broadcast(gameID, session, notification);
@@ -175,6 +176,7 @@ public class WebSocketHandler {
 
 
         } catch (Exception ex) {
+            System.out.println(ex.getMessage());
             errorHandler(ex.getMessage(), gameID, session);
         }
 

@@ -79,6 +79,7 @@ public class GameService {
             GameData game = new GameData(data.gameID(), auth.username(), data.blackUsername(), data.gameName(), data.game(), data.gameOver());
             gameDAO.updateGame(game);
         }
+
     }
 
     public void clear() throws DataAccessException {

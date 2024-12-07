@@ -28,8 +28,9 @@ public class GamingInteraction {
     private final ChessGame.TeamColor colorChoice;
     private final ChessGame chessGame;
     private final NotificationHandler notificationHandler;
+    private GameData gameData;
 
-    public GamingInteraction(String serverUrl, NotificationHandler notificationHandler, String authToken, int gameID, ChessGame.TeamColor colorChoice, WebSocketFacade ws) {
+    public GamingInteraction(String serverUrl, NotificationHandler notificationHandler, String authToken, int gameID, ChessGame.TeamColor colorChoice, WebSocketFacade ws, GameData gameData) {
         this.authToken = authToken;
         this.gameID = gameID;
         this.serverUrl = serverUrl;
@@ -38,6 +39,7 @@ public class GamingInteraction {
         chessGame = new ChessGame();
         this.notificationHandler = notificationHandler;
         this.ws = ws;
+        this.gameData = gameData;
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -69,21 +71,13 @@ public class GamingInteraction {
                 case "quit" -> "quit";
                 default -> help();
             };
-        } catch (ResponseException | IOException ex) {
+        } catch (Exception ex) {
             return ex.getMessage();
         }
     }
 
     public String redrawChessBoard() throws ResponseException {
-        AuthData auth = new AuthData(authToken, null);
-        GameList games = serverFacade.listGames(auth);
-        GameData thisGame = new GameData(0, null, null, null, null, false);
-        for (var c : games.games()) {
-            if (c.gameID() == gameID) {
-                thisGame = c;
-            }
-        }
-        GameplayUI.displayGame(thisGame, colorChoice);
+        ws.redraw(gameData, colorChoice);
         return "";
     }
 
@@ -93,7 +87,7 @@ public class GamingInteraction {
         return "";
     }
 
-    public String makeMove(String... params) throws IOException, ResponseException {
+    public String makeMove(String... params) throws Exception {
         //Translate the Position to an actual ChessPosition
         ChessPosition startPosition = translatePosition(params[0]);
         ChessPosition endPosition = translatePosition(params[1]);
@@ -148,21 +142,46 @@ public class GamingInteraction {
         return "";
     }
 
-    public String highlightMoves(String... params) {
+    public String highlightMoves(String... params) throws Exception {
         //Create the ChessPosition from the input
         ChessPosition position = translatePosition(params[0]);
-
-        //Highlight the Valid Moves
-        Collection<ChessMove> moves = chessGame.validMoves(position);
-
+        ws.highlight(gameData, colorChoice, position);
         return "";
     }
 
-    public ChessPosition translatePosition(String input) {
-        char rowChar = input.charAt(0);
-        char colChar = input.charAt(1);
-        int row = rowChar - 'A' + 1;
-        return new ChessPosition(row, colChar);
+    public ChessPosition translatePosition(String input) throws Exception {
+        return new ChessPosition(input.charAt(1) - '0', parseChar(input.charAt(0)));
+    }
+
+    int parseChar(char in) throws Exception {
+        in = Character.toLowerCase(in);
+        switch (in) {
+            case 'a' -> {
+                return 1;
+            }
+            case 'b' -> {
+                return 2;
+            }
+            case 'c' -> {
+                return 3;
+            }
+            case 'd' -> {
+                return 4;
+            }
+            case 'e' -> {
+                return 5;
+            }
+            case 'f' -> {
+                return 6;
+            }
+            case 'g' -> {
+                return 7;
+            }
+            case 'h' -> {
+                return 8;
+            }
+            default -> throw new Exception("really bad");
+        }
     }
 
     public String help() throws ResponseException {
